@@ -76,7 +76,7 @@ curl http://localhost:8080/api/items
 
 POST로 등록한 아이템이 GET 조회 결과에 그대로 나오면, Docker Hub에서 받은 이미지 → 컨테이너 실행 → MySQL 연동까지 전체 플로우가 문제없이 동작한다는 뜻이다.
 
-![GET /api/items 응답 결과](/assets/img/posts/2026-08-18-Docker-번외-DockerHub-이미지-배포-테스트/image.png)
+![GET /api/items 응답 결과](/assets/img/posts/2026-08-18-Docker-9-DockerHub-이미지-배포-테스트/image.png)
 _POST로 등록한 아이템이 GET 조회 결과에 그대로 반영된 모습_
 
 ---
