@@ -33,6 +33,7 @@ assets/js/dist
 Thumbs.db
 
 .claude/
+.agents/
 
 # Commit convention (local reference only)
 COMMIT_CONVENTION.md
