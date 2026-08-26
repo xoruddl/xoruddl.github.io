@@ -175,7 +175,23 @@ kubectl config use-context kubernetes-admin@cka
 
 ---
 
-## 6. Namespace와 리소스 삭제하기
+## 6. Namespace 분리만으로는 충분하지 않다
+
+Namespace는 리소스 이름과 관리 범위를 나누는 논리적 경계이지만, 그 자체로 사용자 권한이나 Pod 네트워크 통신을 완전히 차단하지는 않는다. 여러 팀이나 환경이 하나의 클러스터를 함께 사용할 때는 Namespace와 함께 권한과 네트워크 정책을 설계해야 한다.
+
+RBAC(Role-Based Access Control)의 `Role`과 `RoleBinding`을 사용하면 사용자나 ServiceAccount가 특정 Namespace 안에서만 필요한 리소스를 조회·변경하도록 제한할 수 있다. 클러스터 전체 권한이 필요한 경우에는 `ClusterRole`, `ClusterRoleBinding`을 사용하지만, 가능한 한 Namespace 범위의 최소 권한을 부여하는 편이 안전하다.
+
+또한 NetworkPolicy는 어떤 Pod가 다른 Pod 또는 외부와 통신할 수 있는지를 제어하는 리소스다. Namespace가 다르다는 이유만으로 통신이 자동 차단되는 것은 아니며, 실제 차단은 NetworkPolicy를 지원하는 CNI 네트워크 플러그인에서 정책을 적용했을 때 이뤄진다.
+
+| 목적 | 함께 사용하는 기능 |
+| --- | --- |
+| 리소스 이름·관리 범위 구분 | Namespace |
+| API 조회·변경 권한 제한 | RBAC의 Role, RoleBinding |
+| Pod 간 인바운드·아웃바운드 통신 제한 | NetworkPolicy |
+
+---
+
+## 7. Namespace와 리소스 삭제하기
 
 특정 Namespace의 Pod만 삭제할 때는 Namespace를 함께 명시한다.
 
@@ -193,8 +209,10 @@ Namespace 삭제는 여러 Pod, Service, Deployment를 한 번에 제거할 수 
 
 ---
 
-## 7. 정리
+## 8. 정리
 
 Namespace는 하나의 Kubernetes 클러스터 안에서 리소스를 논리적으로 분리하는 기준이다. `default`는 Namespace를 지정하지 않았을 때 사용되며, `kube-system`에는 Kubernetes의 핵심 구성 요소가 실행된다.
 
 `-n <namespace>`와 `--all-namespaces`로 원하는 범위의 리소스를 정확히 조회·관리할 수 있다. 자주 사용하는 공간은 kubeconfig context에 기본 Namespace로 등록해 두면 명령어를 간결하게 유지하면서도 다른 환경의 리소스를 잘못 조작할 가능성을 줄일 수 있다.
+
+다만 Namespace만으로는 완전한 격리가 되지 않는다. 여러 팀이나 환경이 클러스터를 공유한다면 RBAC으로 API 권한을 최소화하고, NetworkPolicy로 필요한 통신만 허용해야 논리적 분리를 실제 운영 경계로 발전시킬 수 있다.

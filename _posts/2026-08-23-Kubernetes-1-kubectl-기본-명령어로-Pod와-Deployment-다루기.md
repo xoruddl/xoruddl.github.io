@@ -89,6 +89,8 @@ kubectl get pod webserver -o json
 
 `-o yaml`과 `-o json`은 API 서버에 저장된 리소스 정의 전체를 보여준다. `metadata`, `spec`, `status` 구조를 직접 확인할 수 있어 설정을 파일로 옮기거나 API 객체를 이해할 때 유용하다.
 
+Pod의 API phase는 `Pending`, `Running`, `Succeeded`, `Failed`, `Unknown`으로 구분된다. 반면 `CrashLoopBackOff`, `ImagePullBackOff`, `ContainerCreating`, `Terminating`처럼 `kubectl get pods`의 `STATUS` 열에 보이는 값은 컨테이너의 대기·종료 사유나 표시용 상태일 수 있다. 따라서 문제가 생기면 상태 이름만으로 판단하지 말고 `kubectl describe pod <POD_NAME>`의 Events와 `kubectl logs <POD_NAME>`를 함께 확인하는 것이 좋다.
+
 ---
 
 ## 4. Pod와 Deployment 생성하기
@@ -166,7 +168,7 @@ curl http://localhost:8080
 
 ---
 
-## 7. YAML 파일 만들기와 리소스 정리
+## 7. YAML 파일 만들기와 선언적으로 반영하기
 
 명령어로 만든 Pod는 `--dry-run=client -o yaml`로 YAML 초안을 생성할 수 있다. `--dry-run`만 사용하는 형식은 더 이상 권장되지 않으므로 `--dry-run=client`를 명시한다.
 
@@ -178,7 +180,7 @@ kubectl run webserver \
   -o yaml > webserver-pod.yaml
 ```
 
-생성된 파일을 검토하고 필요한 라벨, 환경 변수, 리소스 요청·제한 등을 추가한 뒤 리소스를 생성한다.
+생성된 파일을 검토하고 필요한 라벨, 환경 변수, 리소스 요청·제한 등을 추가한 뒤 리소스를 생성한다. Label은 리소스를 분류하고 Selector로 찾기 위한 짧은 태그이고, Annotation은 빌드 정보나 관리 도구의 설정처럼 검색 대상이 아닌 부가 정보를 기록할 때 사용한다.
 
 ```bash
 kubectl create -f webserver-pod.yaml
@@ -187,8 +189,33 @@ kubectl create -f webserver-pod.yaml
 이미 존재하는 리소스의 선언을 반복 적용하고 변경 사항을 반영하는 작업에는 보통 다음 명령을 사용한다.
 
 ```bash
+# 현재 클러스터 상태와 매니페스트의 차이 확인
+kubectl diff -f webserver-pod.yaml
+
+# 없으면 생성하고, 있으면 선언 내용에 맞춰 변경
 kubectl apply -f webserver-pod.yaml
 ```
+
+`create`는 같은 이름의 리소스가 이미 있으면 실패하지만, `apply`는 매니페스트를 기준으로 생성과 변경을 함께 처리한다. 따라서 Git으로 YAML을 관리하고 반복 배포하는 흐름에는 `apply`가 잘 맞는다. 다만 리소스를 처음 만들 때부터 `apply`로 관리하거나 `create --save-config`를 사용해야 이후 변경 사항을 일관되게 추적할 수 있다.
+
+Deployment를 반영한 직후에는 원하는 상태가 될 때까지 기다리거나, 필요할 때 관리 중인 Pod를 순차적으로 다시 시작할 수 있다.
+
+```bash
+# Deployment가 사용 가능한 상태가 될 때까지 최대 90초 대기
+kubectl wait --for=condition=Available deployment/mainui --timeout=90s
+
+# Deployment가 관리하는 Pod를 순차적으로 재시작
+kubectl rollout restart deployment/mainui
+
+# 재시작한 롤아웃 진행 상황 확인
+kubectl rollout status deployment/mainui
+```
+
+`kubectl wait`는 다음 명령을 실행하기 전에 리소스가 준비되었는지 확인해야 하는 자동화 과정에서 특히 유용하다. `rollout restart`는 컨테이너 설정을 임시로 고치는 명령이 아니라, Deployment의 Pod 템플릿을 갱신해 새 Pod를 만들도록 하는 방식이다.
+
+---
+
+## 8. 리소스 정리
 
 실습을 마쳤다면 만든 리소스를 명시적으로 삭제한다.
 
@@ -201,8 +228,8 @@ Deployment를 삭제하면 Deployment가 관리하던 ReplicaSet과 Pod도 함�
 
 ---
 
-## 8. 정리
+## 9. 정리
 
-`kubectl`은 Kubernetes 리소스를 조회하고 생성·수정·삭제하는 기본 도구다. `get`과 `describe`로 상태와 이벤트를 확인하고, `logs`, `exec`, `port-forward`로 실행 중인 애플리케이션을 진단할 수 있다.
+`kubectl`은 Kubernetes 리소스를 조회하고 생성·수정·삭제하는 기본 도구다. `get`과 `describe`로 상태와 이벤트를 확인하고, `logs`, `exec`, `port-forward`로 실행 중인 애플리케이션을 진단할 수 있다. Pod의 phase와 `STATUS` 표시값은 구분해 해석해야 정확한 원인을 찾을 수 있다.
 
-간단한 실습은 `kubectl run`으로 Pod를 바로 생성할 수 있지만, 여러 Pod를 안정적으로 유지해야 하는 애플리케이션은 Deployment로 관리하는 것이 적합하다. 명령어로 빠르게 검증한 뒤에는 `--dry-run=client -o yaml`로 초안을 만들고, YAML 파일을 버전 관리하며 `apply`하는 흐름으로 발전시키면 재현 가능한 Kubernetes 환경을 만들 수 있다.
+간단한 실습은 `kubectl run`으로 Pod를 바로 생성할 수 있지만, 여러 Pod를 안정적으로 유지해야 하는 애플리케이션은 Deployment로 관리하는 것이 적합하다. 명령어로 빠르게 검증한 뒤에는 `--dry-run=client -o yaml`로 초안을 만들고, `diff`, `apply`, `wait`를 활용해 YAML을 재현 가능하게 관리하는 흐름으로 발전시키면 좋다.
