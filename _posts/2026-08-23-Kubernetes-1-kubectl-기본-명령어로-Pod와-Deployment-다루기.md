@@ -149,7 +149,69 @@ kubectl logs -p webserver
 
 ---
 
-## 6. 로컬에서 Pod 포트로 연결하기
+## 6. 실행 중인 Pod에 임시 디버그 컨테이너 추가하기
+
+`kubectl exec`는 기존 컨테이너에 셸이나 진단 도구가 있을 때 유용하다. 반면 distroless 이미지처럼 셸이 없거나, 실행 중인 Pod를 바꾸지 않고 네트워크·프로세스를 점검해야 할 때는 `kubectl debug`로 임시 컨테이너를 추가할 수 있다.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  containers:
+    - name: hello-server
+      image: blux2/hello-server:1.0
+      ports:
+        - containerPort: 8080
+```
+
+```bash
+kubectl apply -f myapp.yaml
+
+# curl 도구가 든 임시 컨테이너를 추가하고 셸에 연결
+kubectl debug -it myapp \
+  --image=curlimages/curl:8.4.0 \
+  --target=hello-server \
+  -- sh
+```
+
+위 명령은 기존 Pod에 **임시 컨테이너(Ephemeral Container)** 를 추가한다. 애플리케이션을 구성하는 일반적인 사이드카와 달리, 임시 컨테이너는 문제를 조사하기 위한 용도이며 자동으로 재시작되지 않는다. `--target`은 대상 컨테이너의 프로세스 네임스페이스를 보도록 요청하는 옵션이다. 컨테이너 런타임이 이를 지원하지 않으면 다른 컨테이너의 프로세스가 보이지 않을 수 있다.
+
+```bash
+# 디버그 셸 안에서 서비스 응답 확인
+curl http://localhost:8080
+
+# 임시 컨테이너가 추가됐는지 확인
+kubectl describe pod myapp
+```
+
+임시 컨테이너는 Pod 정의의 `containers` 목록에 영구적으로 추가되는 설정이 아니다. 진단이 끝났다면 설정을 바꾸기보다 필요에 따라 Pod를 재생성하거나, 원인이 된 이미지·매니페스트를 수정하는 방식으로 해결한다.
+
+---
+
+## 7. 로컬과 컨테이너 사이에 파일 복사하기
+
+`kubectl cp`는 로컬 파일과 Pod 안의 파일을 양방향으로 복사할 때 사용한다. Pod에 컨테이너가 여러 개면 `-c`로 대상 컨테이너를 지정한다.
+
+```bash
+# Pod 안의 /etc/hostname 파일을 현재 디렉터리로 복사
+kubectl cp sample-pod:/etc/hostname ./hostname
+
+# 로컬 파일을 Pod의 /tmp/newfile로 복사
+kubectl cp ./hostname sample-pod:/tmp/newfile
+
+# 복사 결과 확인
+kubectl exec -it sample-pod -- ls -l /tmp/newfile
+```
+
+`kubectl cp`는 내부적으로 컨테이너의 `tar` 명령을 사용한다. 따라서 최소화된 이미지에 `tar`가 없으면 복사가 실패할 수 있다. 운영 환경의 설정을 이 방식으로 직접 수정하기보다는, 진단용 파일을 가져오거나 임시로 전달하는 용도로 제한하고 실제 변경은 이미지와 매니페스트로 관리하는 편이 좋다.
+
+---
+
+## 8. 로컬에서 Pod 포트로 연결하기
 
 클러스터 내부의 Pod에 잠시 접속해보고 싶을 때는 `port-forward`를 사용할 수 있다.
 
@@ -168,7 +230,7 @@ curl http://localhost:8080
 
 ---
 
-## 7. YAML 파일 만들기와 선언적으로 반영하기
+## 9. YAML 파일 만들기와 선언적으로 반영하기
 
 명령어로 만든 Pod는 `--dry-run=client -o yaml`로 YAML 초안을 생성할 수 있다. `--dry-run`만 사용하는 형식은 더 이상 권장되지 않으므로 `--dry-run=client`를 명시한다.
 
@@ -215,7 +277,7 @@ kubectl rollout status deployment/mainui
 
 ---
 
-## 8. 리소스 정리
+## 10. 리소스 정리
 
 실습을 마쳤다면 만든 리소스를 명시적으로 삭제한다.
 
@@ -228,8 +290,8 @@ Deployment를 삭제하면 Deployment가 관리하던 ReplicaSet과 Pod도 함�
 
 ---
 
-## 9. 정리
+## 11. 정리
 
-`kubectl`은 Kubernetes 리소스를 조회하고 생성·수정·삭제하는 기본 도구다. `get`과 `describe`로 상태와 이벤트를 확인하고, `logs`, `exec`, `port-forward`로 실행 중인 애플리케이션을 진단할 수 있다. Pod의 phase와 `STATUS` 표시값은 구분해 해석해야 정확한 원인을 찾을 수 있다.
+`kubectl`은 Kubernetes 리소스를 조회하고 생성·수정·삭제하는 기본 도구다. `get`과 `describe`로 상태와 이벤트를 확인하고, `logs`, `exec`, `debug`, `port-forward`로 실행 중인 애플리케이션을 진단할 수 있다. Pod의 phase와 `STATUS` 표시값은 구분해 해석해야 정확한 원인을 찾을 수 있다.
 
 간단한 실습은 `kubectl run`으로 Pod를 바로 생성할 수 있지만, 여러 Pod를 안정적으로 유지해야 하는 애플리케이션은 Deployment로 관리하는 것이 적합하다. 명령어로 빠르게 검증한 뒤에는 `--dry-run=client -o yaml`로 초안을 만들고, `diff`, `apply`, `wait`를 활용해 YAML을 재현 가능하게 관리하는 흐름으로 발전시키면 좋다.
