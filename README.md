@@ -11,3 +11,9 @@
 - [Kubernetes (1) - kubectl 기본 명령어로 Pod와 Deployment 다루기](https://xoruddl.github.io/posts/Kubernetes-1-kubectl-%EA%B8%B0%EB%B3%B8-%EB%AA%85%EB%A0%B9%EC%96%B4%EB%A1%9C-Pod%EC%99%80-Deployment-%EB%8B%A4%EB%A3%A8%EA%B8%B0/)
 
 전체 글은 블로그의 [카테고리](https://xoruddl.github.io/categories/)와 [태그](https://xoruddl.github.io/tags/)에서 확인할 수 있습니다.
+
+## 댓글
+
+댓글은 [Giscus](https://giscus.app/)를 사용하며, 각 글의 댓글과 반응은 이 저장소의 GitHub Discussions로 관리됩니다. 댓글 작성 전에는 GitHub 계정으로 Giscus를 인증해야 합니다.
+
+글별 Discussion은 첫 댓글 또는 반응이 작성될 때 `Announcements` 카테고리에 생성됩니다. 저장소 관리자는 GitHub Discussions에서 댓글을 확인하고 관리할 수 있습니다.
