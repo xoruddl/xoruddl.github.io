@@ -24,7 +24,98 @@ Service는 Pod 개수가 늘거나 줄어도 selector와 일치하는 엔드포�
 
 ---
 
-## 2. Service의 핵심 구성 요소
+## 2. 실전으로 보는 Service: 바뀌는 Pod IP를 고정 이름으로 감추기
+
+한마디로 Service는 **Pod 앞에 고정된 주소를 붙이는 리소스**다. Deployment만으로는 Pod를 생성·교체·확장할 수 있지만, 다른 애플리케이션이 안정적으로 호출할 이름이나 주소를 제공하지는 않는다.
+
+예를 들어 `ingress-lab` 네임스페이스에서 관찰한 Pod 상태가 다음과 같다고 하자. 이 값은 특정 시점의 예시이며, Pod가 재생성되면 이름과 IP가 달라질 수 있다.
+
+| Pod | IP | 노드 |
+| --- | --- | --- |
+| `kafka-7fd968b8d8-tjmkm` | `10.244.169.182` | `k8s-node2` |
+| `mysql-6fc65d59b4-42bxz` | `10.244.169.179` | `k8s-node2` |
+| `mongodb-85547b8478-mq9lm` | `10.244.36.68` | `k8s-node1` |
+
+Deployment가 새 ReplicaSet을 만들거나 Pod를 다른 노드에 재배치하면 Pod IP와 이름 뒤의 해시가 바뀐다. 따라서 애플리케이션 설정에는 Pod IP가 아닌 Service 이름을 넣어야 한다.
+
+```yaml
+env:
+  - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+    value: "kafka:9092"
+  - name: SPRING_DATASOURCE_URL
+    value: "jdbc:mysql://mysql:3306/itemdb"
+```
+
+여기서 `kafka`와 `mysql`은 같은 네임스페이스의 Service 이름이다. 예를 들어 `kafka` Service에 `10.103.196.4`라는 ClusterIP가 할당됐다면, 호출 경로는 다음과 같다.
+
+```text
+kafka:9092                 변하지 않는 Service DNS 이름
+    ↓ DNS 조회
+ClusterIP 10.103.196.4     Service가 유지되는 동안 유지되는 가상 IP
+    ↓ Service 프록시 규칙
+현재 Ready 상태의 Kafka Pod IP:9092
+```
+
+### Service가 맡는 네 가지 역할
+
+1. **안정적인 이름(DNS)**
+
+   `metadata.name: kafka`는 같은 네임스페이스에서 `kafka`로, 전체 이름으로는 `kafka.ingress-lab.svc.cluster.local`로 조회할 수 있다. CoreDNS는 일반 ClusterIP Service 이름을 ClusterIP로 응답하므로, 호출자는 Pod가 교체돼도 같은 이름을 계속 사용한다.
+
+2. **고정된 가상 IP(ClusterIP)**
+
+   ClusterIP는 특정 Pod의 NIC에 붙은 주소가 아니라 Service 프록시가 처리하는 가상 IP다. 노드의 kube-proxy 또는 CNI의 Service 프록시 구현체가 Service와 EndpointSlice 상태를 바탕으로 커널 전달 규칙을 구성하고, 이 IP의 요청을 실제 Pod IP와 `targetPort`로 보낸다. Service 리소스를 삭제하지 않는 한 ClusterIP는 유지된다.
+
+3. **Pod 추적(selector → EndpointSlice)**
+
+   Service는 Deployment 이름을 참조하지 않는다. `selector: app=kafka`처럼 Pod 레이블을 기준으로 백엔드를 찾고, 컨트롤 플레인이 일치하는 Pod를 EndpointSlice에 반영한다.
+
+   ```text
+   Service kafka
+   selector: app=kafka
+       ↓
+   EndpointSlice: kafka-xxxxx
+   endpoints: 10.244.169.182:9092
+   ```
+
+   Pod가 종료되거나 준비 상태가 아니면 일반적으로 트래픽 대상에서 제외되고, 새 Pod가 Ready 상태가 되면 새 IP가 엔드포인트에 추가된다. `readinessProbe`가 중요한 이유도 여기에 있다. 컨테이너가 실행 중이더라도 실제 요청을 처리할 준비가 되기 전에는 Service 트래픽을 받지 않도록 만들 수 있다.
+
+4. **여러 Pod로의 분산**
+
+   현재 `replicas: 1`이면 눈에 잘 보이지 않지만, Deployment를 3개로 확장하면 EndpointSlice에 여러 Pod IP가 등록된다. Service 이름과 호출 코드의 변경 없이 Service 프록시가 준비된 엔드포인트 중 하나로 연결을 분산한다.
+
+### 각 Service가 가리키는 대상
+
+| Service | 주 호출자 | 호출 또는 참조 위치 |
+| --- | --- | --- |
+| `mysql:3306` | `for-docker` 앱 | `jdbc:mysql://mysql:3306/itemdb` |
+| `mongodb:27017` | `for-docker-query` 앱 | `mongodb://mongodb:27017/itemview` |
+| `kafka:9092` | 두 애플리케이션과 Kafka 클라이언트 | `SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092` |
+| `for-docker:80` | Ingress Controller | Ingress의 `backend.service.name` |
+| `for-docker-query:80` | Ingress Controller | Ingress의 `backend.service.name` |
+
+MySQL·MongoDB·Kafka Service는 클러스터 내부 통신의 고정 이름을 제공한다. `for-docker`, `for-docker-query` Service는 Ingress가 백엔드로 지정하는 안정적인 진입점이다. 일반적인 Ingress 규칙은 Pod를 직접 선택하지 않고 Service 이름과 포트를 참조한다.
+
+Kafka처럼 브로커가 하나인 구성에서는 `KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092`처럼 Service 이름을 광고 주소로 사용할 수 있다. 클라이언트는 부트스트랩 이후에도 이 이름으로 다시 접속하므로 Pod IP를 광고하지 않는 것이 중요하다. 다만 여러 Kafka 브로커를 운영할 때는 각 브로커에 개별적으로 도달할 주소가 필요하므로, 단일 ClusterIP Service 하나만으로 구성하지 말고 StatefulSet과 브로커별 Service 같은 Kafka 배포 방식에 맞는 네트워크 구성을 사용해야 한다.
+
+### 직접 확인하기
+
+Deployment를 재시작해 Pod IP가 바뀌어도 Service와 Ingress의 주소는 유지된다.
+
+```bash
+kubectl -n ingress-lab get pod -o wide | grep for-docker
+kubectl -n ingress-lab rollout restart deployment/for-docker
+kubectl -n ingress-lab get pod -o wide | grep for-docker
+
+# Ingress와 DNS가 준비된 환경에서 확인
+curl http://command.test.com/
+```
+
+새 Pod가 Ready 상태가 된 뒤에도 마지막 요청이 성공한다면, Service가 바뀐 Pod IP를 새 EndpointSlice 항목으로 교체해 호출자에게 투명하게 연결하고 있다는 뜻이다.
+
+---
+
+## 3. Service의 핵심 구성 요소
 
 Service는 주로 `selector`와 `ports`로 어떤 Pod의 어느 포트로 보낼지 정한다.
 
@@ -57,7 +148,7 @@ spec:
 
 ---
 
-## 3. Service가 Pod를 찾고 트래픽을 전달하는 과정
+## 4. Service가 Pod를 찾고 트래픽을 전달하는 과정
 
 Service를 생성하면 Kubernetes는 selector에 맞는 Pod를 찾아 EndpointSlice에 등록한다. 실습에서 `kubectl describe svc clusterip-service`를 실행했을 때 다음처럼 세 개의 NGINX Pod IP가 `Endpoints`에 표시됐다.
 
@@ -86,7 +177,7 @@ kubectl describe svc clusterip-service
 
 ---
 
-## 4. ClusterIP: 클러스터 내부의 기본 접근 방식
+## 5. ClusterIP: 클러스터 내부의 기본 접근 방식
 
 `ClusterIP`는 Service 타입을 생략했을 때 적용되는 기본값이다. Service 전용 CIDR에서 가상 IP를 할당하며, 일반적으로 클러스터 내부에서만 이 IP와 DNS 이름으로 접근한다.
 
@@ -128,7 +219,7 @@ failed to allocate IP 10.100.100.100: the provided network does not match the cu
 
 ---
 
-## 5. NodePort: 노드 IP와 고정 포트로 노출하기
+## 6. NodePort: 노드 IP와 고정 포트로 노출하기
 
 `NodePort`는 ClusterIP를 만들고, 모든 노드의 IP에 같은 포트를 열어 외부에서 접근할 수 있게 한다. 기본 포트 범위는 `30000-32767`이며, 실습의 `30200`은 그 범위에 포함된다.
 
@@ -172,7 +263,7 @@ curl http://<node-ip>:30200
 
 ---
 
-## 6. LoadBalancer: 외부 로드 밸런서 연동
+## 7. LoadBalancer: 외부 로드 밸런서 연동
 
 `LoadBalancer`는 클라우드 제공자 또는 로드 밸런서 구현체에 외부 로드 밸런서 생성을 요청하는 Service 타입이다. 일반적으로 LoadBalancer Service는 NodePort를 바탕으로 외부 로드 밸런서의 트래픽을 백엔드 Pod로 전달한다.
 
@@ -244,7 +335,7 @@ EXTERNAL-IP: 203.0.113.10      # 외부 Load Balancer의 공인 IP 예시
 
 ---
 
-## 7. ExternalName: 외부 도메인의 DNS 별칭 만들기
+## 8. ExternalName: 외부 도메인의 DNS 별칭 만들기
 
 `ExternalName`은 Pod를 선택하거나 프록시를 구성하지 않는다. 대신 클러스터 내부의 Service DNS 이름을 외부 도메인의 CNAME 별칭으로 응답하게 한다.
 
@@ -274,7 +365,7 @@ curl externalname-svc.default.svc.cluster.local
 
 ---
 
-## 8. Service 타입 비교와 운영 시 주의점
+## 9. Service 타입 비교와 운영 시 주의점
 
 | 타입 | 접근 주소 | 외부 노출 | 주요 용도 |
 | --- | --- | --- | --- |
@@ -297,7 +388,7 @@ kubectl get endpointslice -l kubernetes.io/service-name=<service-name>
 
 ---
 
-## 9. 정리
+## 10. 정리
 
 Service는 동적으로 바뀌는 Pod 집합 앞에 고정된 이름과 접근 지점을 제공하고, selector에 맞는 준비된 Pod 엔드포인트로 트래픽을 전달한다. `port`는 Service의 포트, `targetPort`는 컨테이너 포트이며, 레이블과 selector가 일치해야 한다.
 
