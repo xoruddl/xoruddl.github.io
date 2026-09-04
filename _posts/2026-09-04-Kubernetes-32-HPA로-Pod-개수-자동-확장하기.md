@@ -150,7 +150,78 @@ kubectl describe hpa sample-hpa-app
 
 ---
 
-## 6. 정리
+## 6. CPU 외의 지표와 다중 지표도 사용할 수 있다
+
+`autoscaling/v2`에서는 CPU·메모리뿐 아니라 애플리케이션과 외부 시스템의 지표도 HPA의 기준으로 삼을 수 있다. 다만 `Pods`, `Object`, `External` 지표를 쓰려면 Metrics Server 외에 해당 지표를 Kubernetes API로 제공하는 메트릭 어댑터가 필요하다.
+
+| 지표 유형 | 측정 대상 | 예시 |
+| --- | --- | --- |
+| `Resource` | Pod의 CPU·메모리 사용량 | 평균 CPU 사용률, 평균 메모리 사용량 |
+| `Pods` | 각 Pod에서 수집한 사용자 정의 지표 | Pod당 활성 연결 수 |
+| `Object` | 특정 Kubernetes 객체의 지표 | Ingress의 초당 요청 수 |
+| `External` | 클러스터 밖에서 수집한 지표 | 메시지 큐 길이, 외부 로드 밸런서 QPS |
+
+여러 지표를 함께 지정할 수도 있다. HPA는 각 지표가 제안한 복제본 수 중 가장 큰 값을 선택하므로, CPU 또는 메모리 중 하나만 목표를 넘어도 스케일 아웃할 수 있다.
+
+```yaml
+metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: AverageValue
+        averageValue: 500Mi
+```
+
+`Utilization`은 컨테이너 `requests` 대비 백분율을, `AverageValue`는 대상 Pod 전체의 평균 실제 사용량을 뜻한다. CPU 사용률처럼 요청량을 기준으로 판단하고 싶다면 `Utilization`을, 평균 `500Mi`처럼 절대값을 목표로 삼고 싶다면 `AverageValue`를 사용한다.
+
+---
+
+## 7. behavior로 확장과 축소 속도를 제어한다
+
+지표가 짧은 시간에 오르내리면 Pod 수가 계속 변하는 플래핑(flapping)이 생길 수 있다. `behavior`에서는 스케일 아웃과 스케일 인의 속도, 안정화 시간을 별도로 제어한다.
+
+```yaml
+behavior:
+  scaleUp:
+    stabilizationWindowSeconds: 0
+    policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+    selectPolicy: Max
+  scaleDown:
+    stabilizationWindowSeconds: 300
+    policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+```
+
+위 설정은 스케일 아웃 시 15초마다 현재 복제본의 100% 또는 4개 중 더 많이 늘릴 수 있는 정책을 고른다. 반대로 스케일 인은 최근 5분의 권장값을 고려하고, 한 번에 현재 복제본의 최대 50%까지만 줄인다.
+
+| 항목 | 역할 |
+| --- | --- |
+| `policies` | 일정 시간(`periodSeconds`) 동안 늘리거나 줄일 수 있는 최대 Pod 수를 정함 |
+| `type: Pods` | 변경 가능한 Pod 개수를 절대값으로 지정 |
+| `type: Percent` | 현재 복제본 수의 비율로 지정 |
+| `selectPolicy` | 정책이 여러 개일 때 `Max`, `Min`, `Disabled` 중 선택 |
+| `stabilizationWindowSeconds` | 짧은 지표 변동에 즉시 반응하지 않도록 권장값을 안정화하는 시간 |
+
+확장은 사용자 요청 지연을 줄이기 위해 비교적 빠르게, 축소는 일시적인 부하 재증가에 대비해 더 보수적으로 설정하는 경우가 많다. 값은 애플리케이션 시작 시간과 실제 트래픽 패턴을 관찰하며 조정한다.
+
+---
+
+## 8. 정리
 
 HPA는 지표가 목표보다 높으면 Pod 수를 늘리고, 낮으면 줄이는 자동 확장 기능이다. CPU 사용률 기반 HPA에서는 `requests.cpu`가 사용률의 기준이므로 대상 컨테이너에 요청량을 지정해야 한다.
 
