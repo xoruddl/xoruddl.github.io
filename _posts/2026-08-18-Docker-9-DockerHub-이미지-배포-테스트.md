@@ -13,7 +13,50 @@ tags: ["docker", "dockerhub", "mysql", "도커"]
 
 ---
 
-## 2. 네트워크 생성 및 MySQL 컨테이너 실행
+## 2. 이미지 빌드 및 Docker Hub push
+테스트에 사용할 이미지는 애플리케이션 프로젝트의 `Dockerfile`이 있는 디렉터리에서 빌드했다. Docker Hub에 올릴 이미지 이름은 `<Docker Hub 사용자명>/<리포지터리명>:<태그>` 형식을 사용하므로, 여기서는 `etakyung/for-docker-java` 리포지터리에 버전 태그와 `latest` 태그를 함께 붙였다.
+
+먼저 Docker Hub 계정으로 로그인한다. 비밀번호 대신 Access Token을 사용하는 경우에는 비밀번호 입력 위치에 토큰을 입력하면 된다.
+
+```bash
+docker login
+```
+
+개발 장비와 배포 서버의 CPU 아키텍처가 다를 수 있으므로, `buildx`로 `linux/amd64`와 `linux/arm64` 이미지를 함께 빌드한다. `amd64`는 일반적인 x86_64 Linux 서버용이고, `arm64`는 Apple Silicon·ARM 기반 Linux 서버용이다.
+
+처음 한 번은 멀티 플랫폼 빌더를 만들고 지원 플랫폼을 확인한다. 같은 이름의 빌더를 이미 만들었다면 새로 생성하지 않고 그 빌더를 선택해서 사용하면 된다.
+
+```bash
+# 멀티 플랫폼 빌더 생성 및 사용
+docker buildx create --name multiarch-builder --driver docker-container --use
+docker buildx inspect --bootstrap
+```
+
+프로젝트 루트에서 두 플랫폼용 이미지를 빌드하고, 버전 태그와 `latest` 태그를 하나의 멀티 아키텍처 이미지 인덱스로 Docker Hub에 바로 push한다.
+
+```bash
+# Dockerfile이 있는 프로젝트 루트에서 실행
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t etakyung/for-docker-java:1.0.0 \
+  -t etakyung/for-docker-java:latest \
+  --push \
+  .
+```
+
+`--push`는 빌드 결과를 로컬 이미지 저장소에 적재하는 대신 레지스트리에 바로 올린다. 따라서 일반 `docker image ls`에 멀티 아키텍처 결과가 보이지 않을 수 있으며, Docker Hub에 올라간 매니페스트를 조회해 두 플랫폼이 포함됐는지 확인한다.
+
+```bash
+docker buildx imagetools inspect etakyung/for-docker-java:1.0.0
+```
+
+출력의 `Manifests` 항목에 `linux/amd64`와 `linux/arm64`가 모두 보이면 정상이다. Dockerfile의 베이스 이미지와 빌드에 사용하는 의존성도 두 플랫폼을 지원해야 멀티 아키텍처 빌드가 성공한다.
+
+`latest`는 특별한 최신 버전 판별 기능이 아니라 단순한 태그 이름이다. 재현 가능한 배포를 위해서는 컨테이너 실행 시 `latest`만 사용하기보다 `1.0.0`처럼 변경하지 않는 버전 태그를 함께 관리하는 편이 안전하다.
+
+---
+
+## 3. 네트워크 생성 및 MySQL 컨테이너 실행
 앱 컨테이너와 DB 컨테이너가 컨테이너 이름으로 서로를 찾을 수 있어야 하므로, 먼저 사용자 정의 네트워크를 만들고 그 안에 MySQL을 띄운다.
 
 ```bash
@@ -38,7 +81,7 @@ docker logs -f mysql-test
 
 ---
 
-## 3. 이미지 pull 및 앱 컨테이너 실행
+## 4. 이미지 pull 및 앱 컨테이너 실행
 Docker Hub에 올려둔 이미지를 pull 받고, 같은 네트워크에서 MySQL 컨테이너 이름(`mysql-test`)을 호스트로 지정해 앱 컨테이너를 실행한다.
 
 ```bash
@@ -63,7 +106,7 @@ docker logs -f app-test
 
 ---
 
-## 4. API 동작 확인
+## 5. API 동작 확인
 앱이 뜬 뒤에는 실제로 아이템을 등록하고 조회하는 API를 호출해서 DB 연동까지 제대로 되는지 확인했다.
 
 ```bash
@@ -81,7 +124,7 @@ _POST로 등록한 아이템이 GET 조회 결과에 그대로 반영된 모습_
 
 ---
 
-## 5. 정리 및 컨테이너 삭제
+## 6. 테스트 환경 정리
 테스트가 끝난 뒤에는 사용한 컨테이너와 네트워크를 정리했다.
 
 ```bash
@@ -93,7 +136,7 @@ docker network rm for-java-net
 
 ---
 
-## 6. 정리
+## 7. 정리
 이번 테스트로 Docker Hub에 올린 이미지가 로컬 빌드 환경이 아닌 별도 환경에서도 pull만으로 동일하게 동작한다는 걸 확인할 수 있었다. 앱과 DB를 서로 다른 컨테이너로 분리하더라도, 같은 사용자 정의 네트워크에 올려두면 컨테이너 이름을 그대로 호스트처럼 써서 연결할 수 있다는 점도 다시 한번 체감했다.
 
 이런 식으로 이미지를 배포하기 전에 실제 pull 환경을 흉내 내서 테스트해두면, 로컬에서만 잘 되던 이미지가 다른 곳에서는 안 뜨는 문제를 미리 걸러낼 수 있다.
