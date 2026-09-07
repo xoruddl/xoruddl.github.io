@@ -117,7 +117,7 @@ Canary의 핵심은 새 버전 복제본을 적게 두는 데 있지 않다. 다
 
 ## 5. 안전한 전환을 위한 사전 조건
 
-어떤 전략을 선택하더라도 새 Pod가 실제 요청을 처리할 준비가 되기 전에는 트래픽을 받지 않아야 한다. Readiness Probe는 준비되지 않은 Pod를 Service Endpoint에서 제외하므로, RollingUpdate·Blue-Green·Canary 모두에 중요한 안전장치다. Probe의 설계는 [Kubernetes (35) - Probe로 컨테이너 상태 점검하기](/2026/09/04/Kubernetes-35-Probe로-컨테이너-상태-점검하기/)에서 확인할 수 있다.
+어떤 전략을 선택하더라도 새 Pod가 실제 요청을 처리할 준비가 되기 전에는 트래픽을 받지 않아야 한다. Readiness Probe는 준비되지 않은 Pod를 Service Endpoint에서 제외하므로, RollingUpdate·Blue-Green·Canary 모두에 중요한 안전장치다. 
 
 기존 Pod를 종료할 때도 처리 중인 요청과 연결을 고려해야 한다. Kubernetes는 Pod 종료 시 컨테이너에 종료 신호를 보내고, `terminationGracePeriodSeconds` 안에 종료되지 않으면 강제 종료한다. 애플리케이션은 종료 신호를 받으면 새 요청 수신을 멈추고 진행 중인 요청을 정리하도록 구현한다. 필요하다면 `preStop` 훅으로 로드 밸런서에서 제외될 시간을 확보할 수 있지만, 훅 실행 시간도 종료 유예 시간에 포함되므로 너무 긴 대기 명령은 피한다.
 
