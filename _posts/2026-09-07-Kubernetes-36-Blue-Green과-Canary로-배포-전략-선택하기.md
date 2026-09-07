@@ -8,7 +8,7 @@ tags: ["kubernetes", "deployment", "blue-green", "canary", "rolling-update", "�
 
 새 버전을 배포하는 일은 단순히 Pod 이미지를 바꾸는 것보다 넓은 문제다. 기존 버전과 새 버전을 얼마나 오래 함께 실행할지, 어떤 기준으로 트래픽을 넘길지, 문제가 생겼을 때 얼마나 빨리 되돌릴지를 함께 결정해야 한다.
 
-이 글에서는 Deployment의 기본 업데이트 방식인 RollingUpdate와, 트래픽 전환을 이용하는 Blue-Green·Canary 전략을 비교한다. Deployment의 매니페스트 구성과 롤백 명령은 [Kubernetes (13) - Deployment로 롤링 업데이트와 롤백 관리하기](/2026/08/30/Kubernetes-13-Deployment로-롤링-업데이트와-롤백-관리하기/)에서 다룬 내용을 바탕으로 한다.
+이 글에서는 Deployment의 기본 업데이트 방식인 RollingUpdate와, 트래픽 전환을 이용하는 Blue-Green·Canary 전략을 비교한다.
 
 ---
 
