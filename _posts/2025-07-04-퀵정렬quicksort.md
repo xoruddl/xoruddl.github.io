@@ -3,7 +3,7 @@ layout: post
 title: "퀵정렬(quick_sort)"
 date: 2025-07-04 02:33:49 +0900
 categories: ["알고리즘"]
-tags: ["CS", "알고리즘", "정렬", "퀵정렬"]
+tags: ["cs", "알고리즘", "정렬", "퀵정렬"]
 ---
 
 # 퀵정렬

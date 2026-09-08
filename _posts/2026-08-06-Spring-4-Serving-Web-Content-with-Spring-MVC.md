@@ -3,7 +3,7 @@ layout: post
 title: "Spring (4) - Serving Web Content with Spring MVC"
 date: 2026-08-06 08:55:30 +0900
 categories: ["Spring"]
-tags: ["Spring"]
+tags: ["spring"]
 ---
 
 https://spring.io/guides/gs/serving-web-content

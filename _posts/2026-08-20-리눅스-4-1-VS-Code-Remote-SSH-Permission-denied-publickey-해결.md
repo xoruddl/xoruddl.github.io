@@ -3,7 +3,7 @@ layout: post
 title: "리눅스 (4-1) - VS Code Remote-SSH Permission denied (publickey) 해결 과정"
 date: 2026-08-20 17:15:31 +0900
 categories: ["리눅스"]
-tags: ["리눅스", "SSH", "VS Code", "Remote-SSH"]
+tags: ["리눅스", "ssh", "vs code", "remote-ssh"]
 ---
 
 VS Code에서 Remote-SSH로 Ubuntu 서버에 접속하려고 했지만 `Permission denied (publickey)` 오류가 발생했다. SSH 키의 passphrase 입력창까지 나타났기 때문에 키 파일 자체는 인식되는 것처럼 보였지만, 실제로는 설정된 개인키와 서버에 등록된 공개키가 서로 맞는지, 그리고 접속 계정이 올바른지를 확인해야 했다.

@@ -3,7 +3,7 @@ layout: post
 title: "Spring Kafka (1) - Spring Boot로 Kafka Producer와 Consumer 이해하기"
 date: 2026-09-07 00:34:35 +0900
 categories: ["Spring", "Kafka"]
-tags: ["Kafka", "Spring Kafka", "Spring Boot", "Producer", "Consumer", "메시지큐"]
+tags: ["kafka", "spring kafka", "spring-boot", "producer", "consumer", "메시지큐"]
 ---
 
 Kafka를 애플리케이션에 연결하려면 Producer와 Consumer의 클라이언트 설정, 직렬화 방식, 리스너 실행 등을 준비해야 한다. Spring Kafka는 이 과정을 Spring의 빈과 애노테이션으로 구성할 수 있게 해 주는 프로젝트다.

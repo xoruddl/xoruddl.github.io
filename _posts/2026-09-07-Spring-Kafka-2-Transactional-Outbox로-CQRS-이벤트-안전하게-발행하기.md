@@ -3,7 +3,7 @@ layout: post
 title: "Spring Kafka (2) - Transactional Outbox로 CQRS 이벤트 안전하게 발행하기"
 date: 2026-09-07 22:59:46 +0900
 categories: ["Spring", "Kafka"]
-tags: ["Kafka", "Spring Kafka", "CQRS", "Outbox Pattern", "MySQL", "MongoDB", "이벤트 드리븐"]
+tags: ["kafka", "spring kafka", "cqrs", "outbox pattern", "mysql", "mongodb", "이벤트 드리븐"]
 ---
 
 Spring Kafka (1)에서는 `KafkaTemplate`으로 메시지를 보내고 `@KafkaListener`로 받는 가장 기본적인 흐름을 정리했다. 하지만 실제 서비스에서 "DB에 데이터를 저장하고, 그 사실을 Kafka로 알린다"는 요구사항을 곧이곧대로 구현하면 문제가 생길 수 있다.

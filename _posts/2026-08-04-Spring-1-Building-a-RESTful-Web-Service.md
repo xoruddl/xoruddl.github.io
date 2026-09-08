@@ -3,7 +3,7 @@ layout: post
 title: "Spring (1) - Building a RESTful Web Service"
 date: 2026-08-04 23:39:11 +0900
 categories: ["Spring"]
-tags: ["Spring"]
+tags: ["spring"]
 ---
 
 https://spring.io/guides/gs/rest-service

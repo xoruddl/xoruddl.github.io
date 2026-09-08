@@ -3,7 +3,7 @@ layout: post
 title: "Spring (2) - Consuming a RESTful Web Service"
 date: 2026-08-05 12:12:41 +0900
 categories: ["Spring"]
-tags: ["Spring"]
+tags: ["spring"]
 ---
 
 https://spring.io/guides/gs/consuming-rest

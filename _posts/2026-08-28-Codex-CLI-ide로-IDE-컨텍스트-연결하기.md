@@ -2,7 +2,7 @@
 layout: post
 title: "Codex CLI - /ide로 IDE 컨텍스트 연결하기"
 date: 2026-08-28 13:53:10 +0900
-tags: ["OpenAI", "Codex", "Codex CLI", "IDE", "VS Code"]
+tags: ["openai", "codex", "codex cli", "ide", "vs code"]
 ---
 
 ## 1. 개요

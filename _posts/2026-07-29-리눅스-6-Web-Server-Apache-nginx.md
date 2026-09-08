@@ -3,7 +3,7 @@ layout: post
 title: "리눅스 (6) - Web Server (Apache, nginx)"
 date: 2026-07-29 17:54:47 +0900
 categories: ["리눅스"]
-tags: ["Nginx", "apache", "리눅스"]
+tags: ["nginx", "apache", "리눅스"]
 ---
 
 ## 리눅스 웹 서버 구축: Apache와 Nginx(리버스 프록시, 로드 밸런싱)

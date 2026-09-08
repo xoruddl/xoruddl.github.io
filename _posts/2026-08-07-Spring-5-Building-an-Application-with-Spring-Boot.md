@@ -3,7 +3,7 @@ layout: post
 title: "Spring (5) - Building an Application with Spring Boot"
 date: 2026-08-07 10:57:48 +0900
 categories: ["Spring"]
-tags: ["Spring"]
+tags: ["spring"]
 ---
 
 https://spring.io/guides/gs/spring-boot
