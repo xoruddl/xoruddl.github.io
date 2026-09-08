@@ -234,3 +234,9 @@ jekyll-archives:
   permalinks:
     tag: /tags/:name/
     category: /categories/:name/
+
+# 추가 플러그인
+# (jekyll-paginate / jekyll-seo-tag / jekyll-archives / jekyll-include-cache 는
+#  chirpy 테마 의존성으로 자동 로드되므로 여기에 다시 적지 않는다)
+plugins:
+  - jekyll-sitemap # https://<도메인>/sitemap.xml 자동 생성 → 구글 서치 콘솔에 등록
