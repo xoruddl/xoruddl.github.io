@@ -234,8 +234,6 @@ my-app/
 └── templates/       # Deployment, Service 등을 만드는 템플릿
 ```
 
-처음에는 공개 Chart에 values 파일을 적용하는 흐름을 충분히 익힌 뒤, 직접 Chart를 만드는 편이 좋다. 템플릿 문법, 조건문, 반복문, 의존 Chart는 별도의 주제로 다룰 만큼 내용이 많다.
-
 ---
 
 ## 8. 정리
