@@ -1,16 +1,17 @@
 ---
 layout: post
-title: "Kubernetes (11) - ReplicationController로 원하는 Pod 수 유지하기"
-date: 2026-08-29 23:15:19 +0900
+title: "Kubernetes (11) - ReplicationController에서 ReplicaSet으로 발전한 이유"
+date: 2026-08-29 12:11:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "replicationcontroller", "replicas", "label", "selector", "쿠버네티스"]
 ---
 
 Pod를 직접 여러 개 만들면 Pod 하나가 삭제되거나 노드 장애로 사라졌을 때 원하는 개수를 직접 다시 맞춰야 한다. ReplicationController는 선언한 수만큼 같은 Pod가 실행되도록 감시하고, 부족하면 새 Pod를 만들어 원하는 상태를 유지한다.
 
-이번 글에서는 `rc-nginx` 예제를 바탕으로 ReplicationController의 구성 요소, 레이블과 selector의 관계, 상태 확인과 스케일 조정 방법을 정리한다.
+이번 글에서는 `rc-nginx` 예제로 초기 복제 컨트롤러의 동작을 확인하고, 선택자 표현력과 배포 관리 측면에서 ReplicaSet과 Deployment가 필요한 이유를 연결해서 살펴본다.
 
 ---
+
 
 ## 1. ReplicationController란?
 

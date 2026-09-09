@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (28) - NFS PersistentVolume으로 여러 Pod가 파일 공유하기"
-date: 2026-09-03 22:12:54 +0900
+title: "Kubernetes (23) - NFS PersistentVolume으로 여러 Pod가 파일 공유하기"
+date: 2026-09-01 12:23:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "nfs", "persistent-volume", "persistent-volume-claim", "pvc", "readwritemany", "storage", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "nfs", "persistent-volume", "persistent-volume-claim", "pvc
 NFS(Network File System)는 네트워크로 공유한 하나의 디렉터리를 여러 노드에서 마운트할 수 있는 파일 시스템이다. Kubernetes에서는 NFS 공유 디렉터리를 PersistentVolume(PV)으로 등록하고, PersistentVolumeClaim(PVC)을 거쳐 Pod에 연결할 수 있다.
 
 ---
+
 
 ## 1. NFS는 네트워크 너머의 같은 폴더를 사용한다
 

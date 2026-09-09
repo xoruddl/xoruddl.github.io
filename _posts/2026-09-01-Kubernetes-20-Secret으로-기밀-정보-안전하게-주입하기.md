@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (24) - Secret으로 기밀 정보를 안전하게 주입하기"
-date: 2026-09-02 08:14:41 +0900
+title: "Kubernetes (20) - Secret으로 기밀 정보를 안전하게 주입하기"
+date: 2026-09-01 12:20:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "secret", "security", "credentials", "environment-variable", "volume", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "secret", "security", "credentials", "environment-variable"
 Secret을 사용한다고 해서 기밀 정보 관리가 자동으로 완성되는 것은 아니다. 누가 Secret을 읽을 수 있는지 RBAC로 제한하고, Git 저장소에 실제 값을 남기지 않으며, 변경된 값을 애플리케이션에 반영하는 방식까지 함께 설계해야 한다.
 
 ---
+
 
 ## 1. Secret은 기밀 정보를 Pod와 분리한다
 

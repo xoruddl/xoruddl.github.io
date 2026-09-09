@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (26) - Pod Volume으로 임시 데이터와 파일 연결하기"
-date: 2026-09-03 22:03:12 +0900
+title: "Kubernetes (21) - Pod Volume으로 임시 데이터와 파일 연결하기"
+date: 2026-09-01 12:21:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "volume", "emptydir", "hostpath", "downward-api", "projected-volume", "storage", "쿠버네티스"]
 ---
@@ -13,6 +13,7 @@ tags: ["kubernetes", "volume", "emptydir", "hostpath", "downward-api", "projecte
 이번 글에서는 Pod와 함께 사용할 임시 파일 공간, 노드 파일 연결, Pod 정보를 파일로 전달하는 방법을 살펴본다. Pod가 없어져도 데이터를 보존해야 하는 PV와 PVC는 다음 글에서 다룬다.
 
 ---
+
 
 ## 1. Volume은 컨테이너에 파일을 연결한다
 

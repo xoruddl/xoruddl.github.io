@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (9) - requests와 limits로 Pod 리소스 관리하기"
-date: 2026-08-29 18:39:22 +0900
+date: 2026-08-29 12:09:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "resources", "requests", "limits", "cpu", "memory", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "pod", "resources", "requests", "limits", "cpu", "memory", 
 이번 글에서는 `nginx-pod-resource` 예제를 바탕으로 requests와 limits의 역할, CPU·메모리 단위, `kubectl describe pod` 출력 확인 방법, 제한을 넘었을 때의 동작을 정리한다.
 
 ---
+
 
 ## 1. requests와 limits란?
 

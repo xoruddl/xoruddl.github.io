@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (20) - MetalLB로 온프레미스 LoadBalancer Service 구성하기"
-date: 2026-09-01 07:53:21 +0900
+title: "Kubernetes (27) - MetalLB로 온프레미스 LoadBalancer Service 구성하기"
+date: 2026-09-03 12:27:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "loadbalancer", "metallb", "bare-metal", "networking", "쿠버네티스"]
 ---
+
 
 ## 1. MetalLB가 필요한 이유
 

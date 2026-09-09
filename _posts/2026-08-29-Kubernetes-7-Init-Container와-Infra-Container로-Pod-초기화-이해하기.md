@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (7) - Init Container와 Infra Container로 Pod 초기화 이해하기"
-date: 2026-08-29 17:00:48 +0900
+date: 2026-08-29 12:07:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "init-container", "infra-container", "pause-container", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ Pod가 시작될 때 애플리케이션 컨테이너만 바로 실행되는 것�
 이번 글에서는 Pod 명세에 직접 작성하는 Init Container와 컨테이너 런타임이 Pod 실행 환경을 만들 때 사용하는 Infra Container를 구분하고, Init Container를 실제로 구성하고 확인하는 방법을 정리한다.
 
 ---
+
 
 ## 1. Pod 시작 과정에서 각 구성 요소의 역할
 
@@ -56,6 +57,8 @@ Init Container는 앱 컨테이너가 시작되기 전에 실행되는 특수한
 ## 3. Service DNS를 확인한 뒤 앱 시작하기
 
 앱이 다른 서비스에 의존한다면, Init Container로 필요한 Service의 DNS 이름을 확인한 뒤 앱 컨테이너를 시작하게 할 수 있다. 먼저 아래처럼 `myservice`와 `mydb` Service를 만든다. 이 예제의 목적은 DNS 이름 해석을 확인하는 것이므로, Service에 selector를 넣지 않았다.
+
+Service의 타입과 트래픽 전달 과정은 17편에서 자세히 다룬다. 여기서는 Service가 클러스터 안에서 일정한 DNS 이름을 제공한다는 점만 사용한다.
 
 ```yaml
 # service.yaml
@@ -107,15 +110,7 @@ spec:
 
 ```bash
 kubectl apply -f service.yaml
-kubectl apply -f myapp-pod.yamlcat /var/lib/kubelet/config.yaml
-
-staticPodPath: /etc/kubernetes/manifests
-staticPodPath 를 수정할 수도 있음
-
-root@cka-control-plane:~/k8s_core_labs/4# cd /etc/kubernetes/manifests/
-root@cka-control-plane:/etc/kubernetes/manifests# ls
-etcd.yaml  kube-apiserver.yaml  kube-controller-manager.yaml  kube-scheduler.yaml
-root@cka-control-plane:/etc/kubernetes/manifests# 
+kubectl apply -f myapp-pod.yaml
 
 # Init Container와 앱 컨테이너의 상태를 함께 확인
 kubectl get pod myapp-pod

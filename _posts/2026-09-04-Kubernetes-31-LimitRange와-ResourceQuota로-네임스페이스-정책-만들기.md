@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (31) - LimitRange와 ResourceQuota로 네임스페이스 정책 만들기"
-date: 2026-09-04 08:39:43 +0900
+date: 2026-09-04 12:31:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "limitrange", "resourcequota", "namespace", "resources", "governance", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "limitrange", "resourcequota", "namespace", "resources", "g
 `LimitRange`와 `ResourceQuota`는 네임스페이스 단위로 기본값과 총량 규칙을 적용하는 리소스다. `LimitRange`는 **개별 Pod·컨테이너의 규칙**, `ResourceQuota`는 **네임스페이스 전체 예산**을 담당한다고 구분하면 이해하기 쉽다.
 
 ---
+
 
 ## 1. 두 리소스의 역할을 구분한다
 

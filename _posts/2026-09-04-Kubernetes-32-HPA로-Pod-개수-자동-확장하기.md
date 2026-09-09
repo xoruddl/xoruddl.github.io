@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (32) - HPA로 Pod 개수 자동 확장하기"
-date: 2026-09-04 08:39:43 +0900
+date: 2026-09-04 12:32:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "hpa", "horizontal-pod-autoscaler", "autoscaling", "metrics-server", "resources", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "hpa", "horizontal-pod-autoscaler", "autoscaling", "metrics
 HPA는 컨테이너 한 개의 크기를 키우는 기능이 아니라, 같은 Pod를 **가로 방향으로 여러 개** 늘리거나 줄이는 기능이다. CPU 기준 HPA를 이해하려면 앞 글의 `requests.cpu`가 왜 중요한지도 함께 알아야 한다.
 
 ---
+
 
 ## 1. HPA는 Pod 수를 바꾼다
 
@@ -32,7 +33,7 @@ HPA는 Deployment, StatefulSet처럼 `scale` 하위 리소스를 제공하는 �
 | VPA | Pod의 CPU·메모리 요청량 | 한 Pod의 요청 메모리 조정 |
 | Cluster Autoscaler | 노드 개수 | 워커 노드 3대 → 4대 |
 
-HPA는 다음 글에서 다룰 Cluster Autoscaler와 자주 함께 쓰이지만, 서로 다른 문제를 해결한다.
+HPA는 뒤에서 다룰 VPA, Cluster Autoscaler와 이름은 비슷하지만 서로 다른 문제를 해결한다.
 
 ---
 
@@ -225,7 +226,7 @@ behavior:
 
 HPA는 지표가 목표보다 높으면 Pod 수를 늘리고, 낮으면 줄이는 자동 확장 기능이다. CPU 사용률 기반 HPA에서는 `requests.cpu`가 사용률의 기준이므로 대상 컨테이너에 요청량을 지정해야 한다.
 
-HPA가 새 Pod를 만들더라도 Pod를 배치할 노드 자리가 없을 수 있다. 다음 글에서는 이때 Pending Pod를 계기로 노드 수를 조절하는 Cluster Autoscaler를 살펴본다.
+HPA는 Pod 개수를 조절하지만 각 Pod의 요청량이 적절한지 판단하지는 않는다. 다음 글에서는 관측한 사용량을 바탕으로 CPU·메모리 requests를 추천하고 적용하는 VPA를 살펴본다.
 
 ---
 

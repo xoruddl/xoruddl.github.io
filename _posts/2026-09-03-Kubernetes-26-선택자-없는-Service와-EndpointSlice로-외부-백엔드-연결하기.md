@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (22) - 선택자 없는 Service와 EndpointSlice로 외부 백엔드 연결하기"
-date: 2026-09-01 07:53:21 +0900
+title: "Kubernetes (26) - 선택자 없는 Service와 EndpointSlice로 외부 백엔드 연결하기"
+date: 2026-09-03 12:26:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "endpointslice", "service-discovery", "external-service", "networking", "쿠버네티스"]
 ---
+
 
 ## 1. selector 없이도 Service를 만들 수 있다
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (36) - Blue-Green과 Canary로 배포 전략 선택하기"
-date: 2026-09-07 16:09:49 +0900
+date: 2026-09-07 12:36:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "deployment", "blue-green", "canary", "rolling-update", "배포전략", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "deployment", "blue-green", "canary", "rolling-update", "�
 이 글에서는 Deployment의 기본 업데이트 방식인 RollingUpdate와, 트래픽 전환을 이용하는 Blue-Green·Canary 전략을 비교한다.
 
 ---
+
 
 ## 1. 배포 전략은 Pod 교체 방식과 트래픽 전환 방식을 함께 정한다
 

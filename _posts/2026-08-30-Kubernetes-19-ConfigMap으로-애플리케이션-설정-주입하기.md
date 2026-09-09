@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (25) - ConfigMap으로 애플리케이션 설정 주입하기"
-date: 2026-09-03 09:13:18 +0900
+title: "Kubernetes (19) - ConfigMap으로 애플리케이션 설정 주입하기"
+date: 2026-08-30 12:19:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "configmap", "configuration", "environment-variable", "volume", "nginx", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "configmap", "configuration", "environment-variable", "volu
 Kubernetes의 ConfigMap은 일반 설정 데이터를 저장해 Pod에 전달하는 리소스다. `APP_MODE=production`처럼 설정 항목 하나를 저장할 수도 있고, Nginx 설정 파일처럼 파일 전체를 저장할 수도 있다. 다만 ConfigMap은 기밀 정보를 위한 저장소가 아니므로 비밀번호·토큰·인증서 개인 키는 Secret으로 관리해야 한다.
 
 ---
+
 
 ## 1. ConfigMap은 일반 설정을 Pod와 분리한다
 

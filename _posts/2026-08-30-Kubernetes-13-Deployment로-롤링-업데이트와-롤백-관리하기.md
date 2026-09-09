@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "Kubernetes (13) - Deployment로 롤링 업데이트와 롤백 관리하기"
-date: 2026-08-30 15:17:31 +0900
+date: 2026-08-30 12:13:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "deployment", "replicaset", "pod", "rolling-update", "rollback", "쿠버네티스"]
 ---
+
 
 ## 1. Deployment란?
 

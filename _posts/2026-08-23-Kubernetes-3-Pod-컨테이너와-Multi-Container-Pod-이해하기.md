@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (3) - Pod 컨테이너와 Multi-Container Pod 이해하기"
-date: 2026-08-23 16:09:45 +0900
+date: 2026-08-23 12:03:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "kubectl", "pod", "container", "multi-container", "쿠버네티스"]
 ---
@@ -15,6 +15,7 @@ Pod는 Kubernetes에서 컨테이너를 실행하는 가장 작은 배포 단위
 위 그림처럼 Pod는 Worker Node에서 실행되며 하나 이상의 컨테이너를 담는다. 이 글에서는 그림의 Pod 내부 구조에 집중한다.
 
 ---
+
 
 ## 1. Pod와 컨테이너의 관계
 

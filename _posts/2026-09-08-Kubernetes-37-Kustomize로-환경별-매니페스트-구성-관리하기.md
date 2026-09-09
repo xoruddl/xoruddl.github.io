@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (37) - Kustomize로 환경별 매니페스트 구성 관리하기"
-date: 2026-09-08 19:51:39 +0900
+date: 2026-09-08 12:37:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "kustomize", "manifest", "configuration", "overlay", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "kustomize", "manifest", "configuration", "overlay", "쿠�
 이 차이 때문에 YAML을 통째로 복사하면, 시간이 지날수록 어느 파일이 기준인지 알기 어려워진다. Kustomize는 **공통 YAML은 한 번만 작성하고, 환경별로 달라지는 부분만 따로 적는** 도구다. 이 글에서는 가장 작은 예제부터 차례로 사용해 본다.
 
 ---
+
 
 ## 1. 먼저 `base`와 `overlay`의 역할을 이해하자
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (38) - Helm Chart로 Kubernetes 애플리케이션 설치와 설정 관리하기"
-date: 2026-09-08 19:51:39 +0900
+date: 2026-09-08 12:38:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "helm", "chart", "manifest", "mariadb", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ Nginx나 MariaDB를 Kubernetes에 직접 설치하려면 Deployment, Service, Se
 처음에는 Helm을 “Kubernetes용 앱 스토어와 설치 기록을 함께 관리하는 도구”라고 생각하면 이해하기 쉽다. 이 글에서는 공개 Chart를 설치하는 가장 기본적인 흐름부터 `values.yaml`로 설정을 바꾸는 방법까지 살펴본다.
 
 ---
+
 
 ## 1. Helm에서 꼭 알아야 할 네 가지
 

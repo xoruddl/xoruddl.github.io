@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "Kubernetes (14) - DaemonSet으로 노드별 Pod 실행하기"
-date: 2026-08-30 16:16:50 +0900
+date: 2026-08-30 12:14:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "daemonset", "pod", "node", "logging", "monitoring", "rolling-update", "쿠버네티스"]
 ---
+
 
 ## 1. DaemonSet이 필요한 이유
 

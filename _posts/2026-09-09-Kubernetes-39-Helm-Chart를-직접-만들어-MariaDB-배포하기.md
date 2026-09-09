@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (39) - Helm Chart를 직접 만들어 MariaDB 배포하기"
-date: 2026-09-09 16:43:19 +0900
+date: 2026-09-09 12:39:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "helm", "chart", "template", "mariadb", "쿠버네티스"]
 ---
@@ -11,6 +11,9 @@ tags: ["kubernetes", "helm", "chart", "template", "mariadb", "쿠버네티스"]
 Chart를 만든다는 말은 대단해 보이지만, 실제로는 **이미 쓰던 YAML에서 환경마다 달라지는 값만 빈칸으로 바꾸는 작업**에 가깝다. 이 글에서는 MariaDB를 설치하는 Chart를 처음부터 만들어 보면서, Chart의 구조와 템플릿 문법을 익힌다.
 
 ---
+
+
+{% raw %}
 
 ## 1. Chart는 세 부분으로 이루어진다
 
@@ -218,6 +221,8 @@ PV와 PVC의 `storageClassName`과 `accessModes`가 서로 맞아야 연결(Boun
 
 앞에서 만든 Secret과 PVC를 사용하는 Deployment를 작성한다.
 
+이 예제는 Helm 템플릿의 연결 관계에 집중하기 위해 복제본이 하나인 Deployment를 사용한다. 24편에서 살펴본 것처럼 Pod별로 안정적인 이름과 개별 볼륨이 필요한 데이터베이스 클러스터라면 StatefulSet이 더 적합하며, 실제 운영에서는 동적 프로비저닝과 백업·복구 방식까지 함께 설계해야 한다.
+
 ```yaml
 # templates/deployment.yaml
 apiVersion: apps/v1
@@ -348,3 +353,5 @@ kubectl get pv
 Chart는 `Chart.yaml`, `values.yaml`, `templates/` 세 부분으로 이루어진다. 템플릿에 빈칸을 만들고 `values.yaml`에 기본값을 모아 두면, Helm이 완성된 Kubernetes YAML을 만들어 설치한다.
 
 처음에는 `.Values`, `.Release.Name`, `| quote`, `{{- if }}`만 익혀도 충분하다. 만든 뒤에는 `helm lint`와 `helm template`으로 결과를 확인하고 설치하는 습관을 들이자.
+
+{% endraw %}

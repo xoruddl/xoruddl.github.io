@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (8) - Static Pod로 kubelet이 직접 관리하는 Pod 이해하기"
-date: 2026-08-29 17:19:59 +0900
+title: "Kubernetes (35) - Static Pod로 kubelet이 직접 관리하는 Pod 이해하기"
+date: 2026-09-04 12:35:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "static-pod", "kubelet", "control-plane", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "pod", "static-pod", "kubelet", "control-plane", "쿠버네
 이 방식은 API 서버가 아직 준비되지 않은 상황에서도 노드에서 중요한 컴포넌트를 실행할 수 있게 한다. 이번 글에서는 `staticPodPath` 설정, kubeadm 컨트롤 플레인의 매니페스트 디렉토리, Static Pod의 생성·확인·수정 방법을 정리한다.
 
 ---
+
 
 ## 1. Static Pod란?
 

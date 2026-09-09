@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (1) - kubectl 기본 명령어로 Pod와 Deployment 다루기"
-date: 2026-08-23 00:30:20 +0900
+date: 2026-08-23 12:01:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "kubectl", "pod", "deployment", "컨테이너", "쿠버네티스"]
 ---
@@ -10,7 +10,10 @@ Kubernetes 클러스터와 상호작용할 때 사용하는 기본 CLI가 `kubec
 
 이번 글에서는 kind로 구성한 로컬 클러스터에서 Nginx Pod와 Apache Deployment를 실행한 기록을 바탕으로, 처음 알아두면 좋은 `kubectl` 명령어를 작업 흐름에 맞춰 정리한다.
 
+여기서 Deployment는 `kubectl` 사용 흐름을 익히기 위한 예제로만 먼저 사용한다. Pod를 지속해서 관리하는 컨트롤러의 원리와 Deployment의 내부 구조는 10편부터 차례로 살펴본다.
+
 ---
+
 
 ## 1. kubectl 도움말과 리소스 종류 확인
 

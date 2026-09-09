@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (18) - Service로 Pod 접근 지점과 로드 밸런싱 구성하기"
-date: 2026-08-30 21:04:04 +0900
+title: "Kubernetes (17) - Service로 Pod 접근 지점과 로드 밸런싱 구성하기"
+date: 2026-08-30 12:17:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "clusterip", "nodeport", "loadbalancer", "externalname", "networking", "쿠버네티스"]
 ---
+
 
 ## 1. Service가 필요한 이유
 

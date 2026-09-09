@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (33) - Cluster Autoscaler로 노드 자동 확장 이해하기"
-date: 2026-09-04 08:39:43 +0900
+title: "Kubernetes (34) - Cluster Autoscaler로 노드 자동 확장 이해하기"
+date: 2026-09-04 12:34:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "cluster-autoscaler", "node-autoscaling", "hpa", "scheduling", "cloud", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ HPA가 부하에 맞춰 Pod 수를 늘려도, 모든 노드에 빈자리가 없�
 Cluster Autoscaler는 스케줄되지 못한 Pod와 노드의 사용 상황을 바탕으로 노드 그룹의 크기를 조절하는 기능이다. Kubernetes만으로 새 서버가 생기는 것은 아니며, 클라우드의 노드 그룹이나 온프레미스의 머신 관리 도구와 연결되어야 한다.
 
 ---
+
 
 ## 1. HPA와 Cluster Autoscaler의 역할은 다르다
 

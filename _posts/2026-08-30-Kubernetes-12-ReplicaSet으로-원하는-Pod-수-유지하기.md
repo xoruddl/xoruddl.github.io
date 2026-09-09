@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (12) - ReplicaSet으로 원하는 Pod 수 유지하기"
-date: 2026-08-30 00:54:22 +0900
+date: 2026-08-30 12:12:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "replicaset", "replicas", "label", "selector", "deployment", "쿠버네티스"]
 ---
@@ -9,6 +9,7 @@ tags: ["kubernetes", "pod", "replicaset", "replicas", "label", "selector", "depl
 Pod는 노드 장애, 애플리케이션 오류, 실수로 인한 삭제처럼 여러 이유로 사라질 수 있다. ReplicaSet은 **지정한 수의 Pod가 계속 실행되도록 유지**하는 컨트롤러다. Pod 수가 부족하면 새 Pod를 만들고, 많으면 일부 Pod를 제거한다.
 
 이번 글에서는 NGINX Pod 세 개를 유지하는 ReplicaSet을 만들고, Pod 삭제·스케일 조정·컨트롤러만 삭제하는 동작을 확인한다.
+
 
 ## ReplicaSet이 관리하는 것
 

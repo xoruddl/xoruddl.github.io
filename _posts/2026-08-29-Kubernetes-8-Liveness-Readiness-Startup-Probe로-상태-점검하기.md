@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (35) - Probe로 컨테이너 상태 점검하기"
-date: 2026-09-04 16:43:33 +0900
+title: "Kubernetes (8) - Liveness, Readiness, Startup Probe로 상태 점검하기"
+date: 2026-08-29 12:08:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "health-check", "probe", "liveness", "readiness", "startup", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "health-check", "probe", "liveness", "readiness", "startup"
 Kubernetes Probe는 kubelet이 컨테이너 상태를 주기적으로 확인하도록 하는 설정이다. 결과에 따라 컨테이너를 재시작하거나 Service 트래픽 대상에서 제외할 수 있으므로, 장애 복구와 안전한 배포 모두에 중요한 역할을 한다.
 
 ---
+
 
 ## 1. 세 Probe의 목적은 서로 다르다
 

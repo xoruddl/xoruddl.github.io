@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (5) - Pod 실행 설정과 Multi-Container 디자인 패턴"
-date: 2026-08-27 18:43:18 +0900
+date: 2026-08-27 12:05:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "container", "sidecar", "hostnetwork", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ Pod는 하나 이상의 컨테이너를 함께 실행하는 Kubernetes의 최소
 이번 글에서는 Pod와 컨테이너 런타임의 역할을 구분하고, Multi-Container Pod에서 자주 언급되는 Sidecar·Ambassador·Adapter 패턴과 컨테이너 실행 설정을 정리한다.
 
 ---
+
 
 ## 1. Pod는 관리 단위, 컨테이너는 실행 단위
 

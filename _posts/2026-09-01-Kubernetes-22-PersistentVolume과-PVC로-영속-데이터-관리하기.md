@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (27) - PersistentVolume과 PVC로 영속 데이터 관리하기"
-date: 2026-09-03 22:10:53 +0900
+title: "Kubernetes (22) - PersistentVolume과 PVC로 영속 데이터 관리하기"
+date: 2026-09-01 12:22:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "persistent-volume", "persistent-volume-claim", "pvc", "storageclass", "storage", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ Pod 안에서 쓰던 데이터를 Pod가 다시 만들어진 뒤에도 보존해
 Kubernetes에서는 PersistentVolume(PV)과 PersistentVolumeClaim(PVC)을 사용해 Pod와 저장소를 분리한다. 처음에는 PV를 "준비된 디스크", PVC를 "디스크 사용 요청서"라고 생각하면 이해하기 쉽다.
 
 ---
+
 
 ## 1. PV와 PVC는 저장소를 Pod와 분리한다
 

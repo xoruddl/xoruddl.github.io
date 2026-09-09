@@ -1,16 +1,17 @@
 ---
 layout: post
-title: "Kubernetes (10) - Pod 환경 변수와 Multi-Container 실행 패턴"
-date: 2026-08-29 21:50:30 +0900
+title: "Kubernetes (6) - 환경 변수로 Pod 실행 설정하기"
+date: 2026-08-27 12:06:00 +0900
 categories: ["Kubernetes"]
-tags: ["kubernetes", "pod", "environment-variable", "kubectl-exec", "sidecar", "adapter", "ambassador", "쿠버네티스"]
+tags: ["kubernetes", "pod", "environment-variable", "kubectl-exec", "configuration", "쿠버네티스"]
 ---
 
 컨테이너 이미지는 여러 환경에서 같은 방식으로 재사용하고, 실행 환경마다 달라지는 값은 Pod 설정으로 분리하는 편이 좋다. Kubernetes의 환경 변수는 애플리케이션의 주소, 실행 모드, 기능 플래그처럼 컨테이너 시작 시 전달할 값을 선언하는 기본적인 방법이다.
 
-이번 글에서는 `MYVAR=testvalue` 환경 변수를 Pod에 설정하고 `kubectl exec`로 확인하는 방법, Multi-Container Pod의 Sidecar·Adapter·Ambassador 실행 패턴을 정리한다.
+이번 글에서는 `MYVAR=testvalue` 환경 변수를 Pod에 설정하고 `kubectl exec`로 컨테이너 안의 값을 확인하는 방법을 정리한다. 여러 값을 ConfigMap과 Secret으로 분리하는 방법은 기본 Pod와 Service를 익힌 뒤 별도 글에서 다룬다.
 
 ---
+
 
 ## 1. Pod 환경 변수는 컨테이너별로 설정한다
 
@@ -97,39 +98,19 @@ kubectl exec my-pod -c helper-app -- printenv MYVAR
 
 ---
 
-## 4. Multi-Container Pod 실행 패턴
+## 4. 환경 변수 사용 시 확인할 점
 
-여러 컨테이너를 하나의 Pod에 배치할 때는 함께 배포되고 같은 Pod 수명주기를 공유해야 하는 이유가 분명해야 한다. Pod 안의 컨테이너는 네트워크 네임스페이스를 공유하므로 `localhost`로 통신할 수 있지만, 파일 시스템은 기본적으로 분리되어 있다. 파일을 교환하려면 `emptyDir` 같은 공유 볼륨을 명시해야 한다.
+환경 변수는 이미지를 다시 만들지 않고 실행 환경별 값을 주입하는 데 적합하다. 그러나 실행 중인 프로세스의 환경 변수는 매니페스트를 수정하는 즉시 바뀌지 않는다. 컨트롤러를 사용하는 단계에서는 Pod 템플릿을 변경해 새 Pod가 생성되도록 해야 한다.
 
-| 패턴 | 보조 컨테이너 역할 | 대표 사례 |
-| --- | --- | --- |
-| Sidecar | 주 애플리케이션에 부가 기능 제공 | 로그 전달, 설정 동기화, 프록시 |
-| Adapter | 앱의 출력·인터페이스 형식을 변환 | 로그·메트릭 형식 변환 |
-| Ambassador | 외부 서비스와의 연결을 중계 | DB 연결 프록시, 서비스 메시 프록시 |
-
-Sidecar는 앱 옆에서 로그 수집이나 인증 프록시처럼 지속적인 보조 기능을 수행한다. Adapter는 애플리케이션이 만든 로그나 메트릭을 수집 시스템이 이해할 수 있는 형식으로 바꾼다. Ambassador는 주 애플리케이션이 외부 데이터베이스나 원격 서비스의 주소·연결 정책을 직접 알지 않게 하고, `localhost`의 보조 컨테이너로 요청을 보낸다.
-
-```text
-앱 컨테이너 → localhost:프록시 포트 → Ambassador → 외부 데이터베이스
-앱 컨테이너 → 공유 볼륨의 로그 파일 → Sidecar → 로그 수집 시스템
-앱 컨테이너 → 원본 메트릭 → Adapter → 표준화된 메트릭
-```
+비밀번호나 토큰 같은 민감한 값을 일반 YAML에 직접 기록하지 않는다. 여러 Pod가 공유하는 일반 설정은 ConfigMap, 민감한 설정은 Secret으로 분리할 수 있으며 19편과 20편에서 각각 다룬다.
 
 ---
 
-## 5. 패턴을 선택할 때 확인할 점
-
-환경 변수는 이미지를 수정하지 않고 실행 환경별 값을 주입하는 데 적합하다. 값이 바뀌었을 때 Pod 재생성이 필요한지 배포 전략과 함께 판단하고, 민감한 값은 매니페스트에 직접 작성하지 않도록 주의한다.
-
-Multi-Container Pod는 컨테이너가 반드시 함께 배포·확장·종료되어야 할 때 선택한다. 서로 독립적인 확장이나 별도 릴리스가 필요한 컴포넌트라면 같은 Pod에 넣기보다 별도 Deployment와 Service로 분리하는 편이 운영하기 쉽다.
-
----
-
-## 6. 정리
+## 5. 정리
 
 Pod 환경 변수는 `env`로 컨테이너별로 설정할 수 있다. `MYVAR=testvalue`처럼 직접 값을 주입한 뒤 `kubectl exec ... -- printenv MYVAR`로 확인하면, 매니페스트 값이 컨테이너 실행 환경에 반영됐는지 빠르게 검증할 수 있다.
 
-Sidecar·Adapter·Ambassador는 Multi-Container Pod에서 역할을 분리하는 대표 패턴이다. 같은 Pod의 컨테이너는 localhost 네트워크를 공유하지만 파일 시스템은 분리된다는 점을 전제로, 함께 수명주기를 가져야 하는 구성만 묶는 것이 중요하다.
+환경 변수는 컨테이너별로 선언되며 같은 Pod의 다른 컨테이너에 자동으로 공유되지 않는다. 다음 글에서는 애플리케이션 컨테이너보다 먼저 실행되는 Init Container와 Pod의 실행 환경을 유지하는 Infra Container를 구분한다.
 
 ---
 

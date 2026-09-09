@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (15) - StatefulSet으로 고정된 Pod 식별자와 스토리지 관리하기"
-date: 2026-08-30 16:33:07 +0900
+title: "Kubernetes (24) - StatefulSet으로 고정된 Pod 식별자와 스토리지 관리하기"
+date: 2026-09-02 12:24:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "statefulset", "pod", "headless-service", "persistent-volume", "storage", "rolling-update", "쿠버네티스"]
 ---
+
 
 ## 1. StatefulSet이 필요한 이유
 

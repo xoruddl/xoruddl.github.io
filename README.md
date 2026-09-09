@@ -6,9 +6,9 @@
 
 ## 최근 글
 
-- [Kubernetes (6) - 워크로드 컨트롤러로 Pod 운영하기](https://xoruddl.github.io/posts/Kubernetes-6-%EC%9B%8C%ED%81%AC%EB%A1%9C%EB%93%9C-%EC%BB%A8%ED%8A%B8%EB%A1%A4%EB%9F%AC%EB%A1%9C-Pod-%EC%9A%B4%EC%98%81%ED%95%98%EA%B8%B0/)
-- [Kubernetes (5) - Pod 실행 설정과 Multi-Container 디자인 패턴](https://xoruddl.github.io/posts/Kubernetes-5-Pod-%EC%8B%A4%ED%96%89-%EC%84%A4%EC%A0%95%EA%B3%BC-Multi-Container-%EB%94%94%EC%9E%90%EC%9D%B8-%ED%8C%A8%ED%84%B4/)
-- [Kubernetes (1) - kubectl 기본 명령어로 Pod와 Deployment 다루기](https://xoruddl.github.io/posts/Kubernetes-1-kubectl-%EA%B8%B0%EB%B3%B8-%EB%AA%85%EB%A0%B9%EC%96%B4%EB%A1%9C-Pod%EC%99%80-Deployment-%EB%8B%A4%EB%A3%A8%EA%B8%B0/)
+- [Kubernetes (39) - Helm Chart를 직접 만들어 MariaDB 배포하기](https://xoruddl.github.io/posts/Kubernetes-39-Helm-Chart%EB%A5%BC-%EC%A7%81%EC%A0%91-%EB%A7%8C%EB%93%A4%EC%96%B4-MariaDB-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0/)
+- [Kubernetes (38) - Helm Chart로 Kubernetes 애플리케이션 설치와 설정 관리하기](https://xoruddl.github.io/posts/Kubernetes-38-Helm-Chart%EB%A1%9C-Kubernetes-%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EC%84%A4%EC%B9%98%EC%99%80-%EC%84%A4%EC%A0%95-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0/)
+- [Kubernetes (37) - Kustomize로 환경별 매니페스트 구성 관리하기](https://xoruddl.github.io/posts/Kubernetes-37-Kustomize%EB%A1%9C-%ED%99%98%EA%B2%BD%EB%B3%84-%EB%A7%A4%EB%8B%88%ED%8E%98%EC%8A%A4%ED%8A%B8-%EA%B5%AC%EC%84%B1-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0/)
 
 전체 글은 블로그의 [카테고리](https://xoruddl.github.io/categories/)와 [태그](https://xoruddl.github.io/tags/)에서 확인할 수 있습니다.
 

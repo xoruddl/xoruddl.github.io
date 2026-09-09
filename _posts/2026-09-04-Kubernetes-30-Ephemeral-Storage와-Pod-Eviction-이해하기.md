@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (30) - Ephemeral Storage와 Pod Eviction 이해하기"
-date: 2026-09-04 08:39:43 +0900
+date: 2026-09-04 12:30:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "ephemeral-storage", "eviction", "emptydir", "resources", "kubelet", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "ephemeral-storage", "eviction", "emptydir", "resources", "
 이런 임시 디스크 사용량을 관리하는 리소스가 `ephemeral-storage`다. 데이터를 오래 보존하는 PV와 PVC의 저장소가 아니라, Pod가 실행되는 동안 노드 로컬에 생기는 파일 공간을 관리한다.
 
 ---
+
 
 ## 1. Ephemeral Storage는 어떤 파일을 포함할까?
 

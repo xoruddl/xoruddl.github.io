@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (21) - Service 트래픽 정책과 세션 어피니티로 전송 경로 제어하기"
-date: 2026-09-01 07:53:21 +0900
+title: "Kubernetes (25) - Service 트래픽 정책과 세션 어피니티로 전송 경로 제어하기"
+date: 2026-09-03 12:25:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "session-affinity", "externaltrafficpolicy", "topology-aware-routing", "networking", "쿠버네티스"]
 ---
+
 
 ## 1. Service의 분산 경로도 제어할 수 있다
 

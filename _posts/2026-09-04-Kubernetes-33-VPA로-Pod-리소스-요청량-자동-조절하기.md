@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Kubernetes (34) - VPA로 Pod 리소스 요청량 자동 조절하기"
-date: 2026-09-04 16:42:07 +0900
+title: "Kubernetes (33) - VPA로 Pod 리소스 요청량 자동 조절하기"
+date: 2026-09-04 12:33:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "vpa", "vertical-pod-autoscaler", "autoscaling", "resources", "requests", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ tags: ["kubernetes", "vpa", "vertical-pod-autoscaler", "autoscaling", "resources
 Vertical Pod Autoscaler(VPA)는 컨테이너의 실제 사용량을 관찰해 CPU와 메모리 `requests`의 권장값을 계산하고, 설정에 따라 적용하는 기능이다. 실행 중인 컨테이너에 CPU·메모리를 즉시 더하는 기능으로 이해하기보다, **적절한 요청량을 추천하고 설정에 따라 Pod를 교체하거나 제자리에서 반영하는 도구**로 이해하는 것이 좋다.
 
 ---
+
 
 ## 1. VPA는 Pod의 크기를 조절한다
 
@@ -153,7 +154,7 @@ HPA와 VPA를 함께 사용해야 한다면 HPA는 요청 수나 큐 길이 같�
 
 VPA는 컨테이너의 CPU·메모리 `requests`를 관측 기반으로 추천하고, 설정에 따라 새 Pod에 반영하는 자동화 도구다. 요청량을 한 번 정한 뒤 방치하기보다, 실제 서비스의 사용 패턴으로 점검하는 데 특히 유용하다.
 
-처음에는 `Off` 모드로 `Target` 권장값을 관찰하고, 재생성으로 인한 영향과 HPA의 지표 기준을 검토한 뒤 자동 적용을 선택한다. 다음 글에서는 Pod가 정상 실행 중인지와 트래픽을 받을 준비가 되었는지를 판단하는 Probe를 살펴본다.
+처음에는 `Off` 모드로 `Target` 권장값을 관찰하고, 재생성으로 인한 영향과 HPA의 지표 기준을 검토한 뒤 자동 적용을 선택한다. 다음 글에서는 Pod를 배치할 공간이 부족할 때 워커 노드 수를 조절하는 Cluster Autoscaler를 살펴본다.
 
 ---
 

@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (16) - Job Controller로 일회성 Batch 작업 완료 보장하기"
-date: 2026-08-30 18:35:43 +0900
+title: "Kubernetes (15) - Job Controller로 일회성 Batch 작업 완료 보장하기"
+date: 2026-08-30 12:15:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "job", "job-controller", "batch", "pod", "backofflimit", "activedeadlineseconds", "쿠버네티스"]
 ---
+
 
 ## 1. Job이 필요한 이유
 

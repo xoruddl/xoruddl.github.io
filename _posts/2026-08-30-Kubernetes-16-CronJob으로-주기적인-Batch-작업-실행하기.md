@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (17) - CronJob으로 주기적인 Batch 작업 실행하기"
-date: 2026-08-30 19:01:54 +0900
+title: "Kubernetes (16) - CronJob으로 주기적인 Batch 작업 실행하기"
+date: 2026-08-30 12:16:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "cronjob", "job", "batch", "schedule", "concurrencypolicy", "쿠버네티스"]
 ---
+
 
 ## 1. CronJob이 필요한 이유
 

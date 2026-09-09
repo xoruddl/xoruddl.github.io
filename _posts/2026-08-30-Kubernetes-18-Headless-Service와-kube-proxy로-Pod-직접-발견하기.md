@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (19) - Headless Service와 kube-proxy로 Pod 직접 발견하기"
-date: 2026-08-30 22:30:10 +0900
+title: "Kubernetes (18) - Headless Service와 kube-proxy로 Pod 직접 발견하기"
+date: 2026-08-30 12:18:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "headless-service", "kube-proxy", "dns", "endpointslice", "iptables", "쿠버네티스"]
 ---
+
 
 ## 1. Headless Service가 필요한 이유
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes (2) - Namespace로 리소스 분리하고 context 전환하기"
-date: 2026-08-23 01:50:16 +0900
+date: 2026-08-23 12:02:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "kubectl", "namespace", "context", "kubeconfig", "쿠버네티스"]
 ---
@@ -11,6 +11,7 @@ Kubernetes에서 Namespace는 하나의 클러스터 안에서 리소스를 논�
 이번 글에서는 Namespace 목록을 확인하고, `blue`와 `orange` Namespace를 만든 뒤 Pod를 배치하는 과정을 정리한다. 또한 kubeconfig의 context에 기본 Namespace를 연결해 매번 `-n` 옵션을 쓰지 않는 방법도 함께 살펴본다.
 
 ---
+
 
 ## 1. Namespace란?
 

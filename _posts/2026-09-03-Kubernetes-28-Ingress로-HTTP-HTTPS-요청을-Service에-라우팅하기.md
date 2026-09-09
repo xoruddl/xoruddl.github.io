@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Kubernetes (23) - Ingress로 HTTP/HTTPS 요청을 Service에 라우팅하기"
-date: 2026-09-01 07:53:21 +0900
+title: "Kubernetes (28) - Ingress로 HTTP/HTTPS 요청을 Service에 라우팅하기"
+date: 2026-09-03 12:28:00 +0900
 categories: ["Kubernetes"]
 tags: ["kubernetes", "ingress", "ingress-controller", "service", "http", "https", "routing", "쿠버네티스"]
 ---
+
 
 ## 1. Ingress가 필요한 이유
 
