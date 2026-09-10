@@ -109,15 +109,18 @@ img { max-width: 100%; height: auto; }
 .section-title { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 18px; }
 .section-title h2 { margin: 0; font-size: 1.15rem; }
 .section-title span { color: var(--muted); font-size: .82rem; }
-.post-list { display: grid; gap: 15px; }
-.post-card { padding: 25px 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.post-list { display: grid; gap: 11px; }
+.post-card { position: relative; padding: 19px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .post-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent), var(--line) 55%); box-shadow: var(--shadow); }
 .post-card-meta { display: flex; gap: 7px; color: var(--muted); font-size: .78rem; }
-.post-card h2 { margin: 8px 0 10px; font-size: clamp(1.1rem, 2.5vw, 1.38rem); line-height: 1.45; letter-spacing: -.02em; }
+.post-card h2 { margin: 6px 0 7px; font-size: clamp(1.06rem, 2.3vw, 1.28rem); line-height: 1.4; letter-spacing: -.02em; }
+.post-card h2 a::after { position: absolute; inset: 0; border-radius: var(--radius); content: ''; }
+.post-card h2 a:focus-visible { outline: none; }
+.post-card h2 a:focus-visible::after { outline: 3px solid var(--accent); outline-offset: 3px; }
 .post-card h2 a:hover { color: var(--accent); }
-.post-card p { margin: 0 0 14px; color: var(--muted); font-size: .92rem; }
+.post-card p { display: -webkit-box; margin: 0 0 10px; overflow: hidden; color: var(--muted); font-size: .87rem; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-.chips a, .chip { padding: 4px 10px; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: .74rem; }
+.chips a, .chip { position: relative; z-index: 1; padding: 3px 9px; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: .72rem; }
 .chips a:hover, .chip:hover { background: var(--accent-soft); color: var(--accent); }
 .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
 .pagination a, .pagination span { min-width: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); text-align: center; }
@@ -219,7 +222,7 @@ img { max-width: 100%; height: auto; }
   .scrim { position: fixed; inset: 0; z-index: 19; background: rgba(0,0,0,.45); }
   .scrim.is-open { display: block; }
   .site-main { margin-left: 0; padding: 34px 18px 24px; }
-  .post-card { padding: 21px; }
+  .post-card { padding: 17px 18px; }
   .category-link { padding: 17px 16px; gap: 9px; }
   .category-link small { margin-left: auto; }
   .category-toggle { width: 50px; flex-basis: 50px; }
