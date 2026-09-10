@@ -129,12 +129,12 @@ img { max-width: 100%; height: auto; }
 .post-layout { width: min(1180px, 100%); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 820px) 240px; gap: 42px; align-items: start; }
 .post { min-width: 0; }
 .post-header { margin-bottom: 32px; padding-bottom: 25px; border-bottom: 1px solid var(--line); }
-.post-header h1 { margin: 11px 0 15px; font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.25; letter-spacing: -.045em; }
+.post-header h1 { margin: 11px 0 15px; font-size: clamp(1.65rem, 3.6vw, 2.4rem); line-height: 1.25; letter-spacing: -.045em; }
 .post-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; color: var(--muted); font-size: .85rem; }
-.post-content { font-size: 1rem; overflow-wrap: anywhere; }
+.post-content { font-size: .94rem; overflow-wrap: anywhere; }
 .post-content h2, .post-content h3, .post-content h4 { scroll-margin-top: 24px; line-height: 1.35; letter-spacing: -.025em; }
-.post-content h2 { margin: 2.5em 0 .8em; padding-bottom: .38em; border-bottom: 1px solid var(--line); font-size: 1.55rem; }
-.post-content h3 { margin: 2em 0 .7em; font-size: 1.25rem; }
+.post-content h2 { margin: 2.5em 0 .8em; padding-bottom: .38em; border-bottom: 1px solid var(--line); font-size: 1.35rem; }
+.post-content h3 { margin: 2em 0 .7em; font-size: 1.12rem; }
 .post-content p { margin: 1em 0; }
 .post-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .post-content strong { font-weight: 700; }
