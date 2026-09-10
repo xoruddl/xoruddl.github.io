@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Pagination from '../components/Pagination.astro';
 import PostList from '../components/PostList.astro';
-import { asList, excerpt, formatDate, postUrl, readingMinutes, sortPosts, taxonomySlug } from '../lib/posts';
+import { PAGE_SIZE, asList, excerpt, formatDate, postUrl, readingMinutes, sortPosts, taxonomySlug } from '../lib/posts';
 
-const PAGE_SIZE = 10;
 const posts = sortPosts(await getCollection('posts'));
 const shown = posts.slice(0, PAGE_SIZE);
 const pages = Math.ceil(posts.length / PAGE_SIZE);
@@ -32,7 +32,7 @@ const searchJson = JSON.stringify(searchItems).replace(/</g, '\\u003c');
     <div id="home-default-content">
       <div class="section-title"><h2>최근 글</h2><span>{posts.length}개의 기록</span></div>
       <PostList posts={shown} />
-      {pages > 1 && <nav class="pagination" aria-label="페이지 이동"><span aria-current="page">1</span><a href="/page2/" aria-label="다음 페이지">다음</a></nav>}
+      <Pagination current={1} total={pages} />
     </div>
     <script is:inline type="application/json" id="home-search-data" set:html={searchJson}></script>
   </div>

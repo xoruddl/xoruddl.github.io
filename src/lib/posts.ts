@@ -2,6 +2,12 @@ import type { CollectionEntry } from 'astro:content';
 
 export type Post = CollectionEntry<'posts'>;
 
+export const PAGE_SIZE = 10;
+
+export function pageUrl(page: number): string {
+  return page === 1 ? '/' : `/page${page}/`;
+}
+
 export function asList(value: string | string[] | undefined): string[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];

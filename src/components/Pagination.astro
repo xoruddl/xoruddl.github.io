@@ -1,0 +1,37 @@
+---
+import { pageUrl } from '../lib/posts';
+
+interface Props {
+  current: number;
+  total: number;
+}
+const { current, total } = Astro.props;
+
+// 첫·마지막 페이지와 현재 페이지 앞뒤만 번호로 보여주고, 두 칸 이상 벌어지면 생략 기호로 줄인다.
+const visible = [...new Set([1, current - 1, current, current + 1, total])]
+  .filter((page) => page >= 1 && page <= total)
+  .sort((a, b) => a - b);
+const items: (number | 'gap')[] = [];
+visible.forEach((page, index) => {
+  const prev = visible[index - 1];
+  if (prev !== undefined && page - prev === 2) items.push(prev + 1);
+  else if (prev !== undefined && page - prev > 2) items.push('gap');
+  items.push(page);
+});
+---
+
+{total > 1 && (
+  <nav class="pagination" aria-label="페이지 이동">
+    {current > 1
+      ? <a class="pagination-step" href={pageUrl(current - 1)} aria-label="이전 페이지"><span aria-hidden="true">‹</span><span class="pagination-label">이전</span></a>
+      : <span class="pagination-step is-disabled" aria-hidden="true"><span>‹</span><span class="pagination-label">이전</span></span>}
+    {items.map((item) => item === 'gap'
+      ? <span class="pagination-gap" aria-hidden="true">…</span>
+      : item === current
+        ? <span aria-current="page">{item}</span>
+        : <a href={pageUrl(item)} aria-label={`${item}페이지`}>{item}</a>)}
+    {current < total
+      ? <a class="pagination-step" href={pageUrl(current + 1)} aria-label="다음 페이지"><span class="pagination-label">다음</span><span aria-hidden="true">›</span></a>
+      : <span class="pagination-step is-disabled" aria-hidden="true"><span class="pagination-label">다음</span><span>›</span></span>}
+  </nav>
+)}

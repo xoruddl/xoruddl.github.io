@@ -122,9 +122,13 @@ img { max-width: 100%; height: auto; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chips a, .chip { position: relative; z-index: 1; padding: 3px 9px; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: .72rem; }
 .chips a:hover, .chip:hover { background: var(--accent-soft); color: var(--accent); }
-.pagination { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
-.pagination a, .pagination span { min-width: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); text-align: center; }
-.pagination a:hover { border-color: var(--accent); color: var(--accent); }
+.pagination { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 30px; }
+.pagination > a, .pagination > span { display: inline-flex; min-width: 38px; height: 38px; align-items: center; justify-content: center; gap: 5px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: .88rem; }
+.pagination > a:hover { border-color: var(--accent); color: var(--accent); }
+.pagination > [aria-current='page'] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.pagination > .is-disabled { color: var(--muted); opacity: .45; }
+.pagination > .pagination-gap { min-width: 20px; padding: 0; border: 0; background: none; color: var(--muted); }
+.pagination-step [aria-hidden='true'], .pagination-step.is-disabled span:not(.pagination-label) { font-size: 1.15rem; line-height: 1; }
 
 .post-layout { width: min(1180px, 100%); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 820px) 240px; gap: 42px; align-items: start; }
 .post { min-width: 0; }
@@ -224,6 +228,9 @@ img { max-width: 100%; height: auto; }
   .scrim.is-open { display: block; }
   .site-main { margin-left: 0; padding: 34px 18px 24px; }
   .post-card { padding: 17px 18px; }
+  .pagination { gap: 5px; }
+  .pagination > a, .pagination > span { min-width: 34px; height: 36px; padding: 0 8px; }
+  .pagination-label { display: none; }
   .category-link { padding: 17px 16px; gap: 9px; }
   .category-link small { margin-left: auto; }
   .category-toggle { width: 50px; flex-basis: 50px; }
