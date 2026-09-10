@@ -14,7 +14,9 @@ _site
 
 # NPM dependencies
 node_modules
-package-lock.json
+dist
+.astro
+/public/assets/
 
 # IDE configurations
 .idea

@@ -1,0 +1,113 @@
+---
+import '../styles/global.css';
+import { SITE } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title = SITE.title,
+  description = SITE.description,
+  canonical = Astro.url.pathname,
+  type = 'website',
+} = Astro.props;
+const pageTitle = title === SITE.title ? title : `${title} | ${SITE.title}`;
+const canonicalUrl = new URL(canonical, SITE.url);
+---
+
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="google-site-verification" content={SITE.googleVerification} />
+    <meta name="generator" content={Astro.generator} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/feed.xml" />
+    <link rel="icon" href="/assets/img/favicons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/img/favicons/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/assets/img/favicons/apple-touch-icon.png" />
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <header class="mobile-header">
+      <a class="mobile-brand" href="/">{SITE.title}</a>
+      <button class="icon-button" id="menu-toggle" aria-label="메뉴 열기">☰</button>
+    </header>
+    <aside class="sidebar" id="sidebar">
+      <a class="profile" href="/" aria-label="홈으로 이동">
+        <img src="/assets/img/avatar.jpg" alt="eta_kyung 프로필" width="112" height="112" />
+        <strong>{SITE.title}</strong>
+        <span>{SITE.tagline}</span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <a href="/" data-nav="/">홈</a>
+        <a href="/categories/" data-nav="/categories/">카테고리</a>
+        <a href="/tags/" data-nav="/tags/">태그</a>
+        <a href="/archives/" data-nav="/archives/">아카이브</a>
+        <a href="/about/" data-nav="/about/">소개</a>
+        <a href="/search/" data-nav="/search/">검색</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href={SITE.github} target="_blank" rel="noreferrer" aria-label="GitHub">GitHub</a>
+        <a href="/feed.xml" aria-label="RSS">RSS</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="색상 모드 전환">◐</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+    <main class="site-main">
+      <slot />
+      <footer class="site-footer">
+        <span>© {new Date().getFullYear()} {SITE.author}</span>
+        <span>Built with Astro</span>
+      </footer>
+    </main>
+    <script>
+      const root = document.documentElement;
+      const sidebar = document.querySelector('#sidebar');
+      const scrim = document.querySelector('#scrim');
+      const menuToggle = document.querySelector('#menu-toggle');
+      const themeToggle = document.querySelector('#theme-toggle');
+      const closeMenu = () => {
+        sidebar?.classList.remove('is-open');
+        scrim?.classList.remove('is-open');
+      };
+      menuToggle?.addEventListener('click', () => {
+        sidebar?.classList.toggle('is-open');
+        scrim?.classList.toggle('is-open');
+      });
+      scrim?.addEventListener('click', closeMenu);
+      themeToggle?.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      });
+      const path = window.location.pathname;
+      document.querySelectorAll<HTMLAnchorElement>('[data-nav]').forEach((link) => {
+        const target = link.dataset.nav ?? '';
+        if (target === '/' ? path === '/' || /^\/page\d+\/$/.test(path) : path.startsWith(target)) {
+          link.setAttribute('aria-current', 'page');
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,81 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { asList, excerpt, formatDate, postSlug, postUrl, readingMinutes, sortPosts, taxonomySlug } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = sortPosts(await getCollection('posts'));
+  return posts.map((post, index) => ({
+    params: { slug: postSlug(post) },
+    props: {
+      post,
+      newer: index > 0 ? posts[index - 1] : null,
+      older: index < posts.length - 1 ? posts[index + 1] : null,
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+  newer: CollectionEntry<'posts'> | null;
+  older: CollectionEntry<'posts'> | null;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+const categories = asList(post.data.categories);
+const tags = asList(post.data.tags);
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+<BaseLayout title={post.data.title} description={excerpt(post, 160)} canonical={postUrl(post)} type="article">
+  <div class="post-layout">
+    <article class="post">
+      <header class="post-header">
+        <div class="chips">
+          {categories.map((category) => <a href={`/categories/${taxonomySlug(category)}/`}>{category}</a>)}
+        </div>
+        <h1>{post.data.title}</h1>
+        <div class="post-meta">
+          <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+          <span>읽는 시간 {readingMinutes(post)}분</span>
+          {post.data.last_modified_at && <span>수정 {formatDate(post.data.last_modified_at)}</span>}
+        </div>
+      </header>
+      <div class="post-content"><Content /></div>
+      <footer class="post-footer">
+        {tags.length > 0 && <div class="chips">{tags.map((tag) => <a href={`/tags/${taxonomySlug(tag)}/`}>#{tag}</a>)}</div>}
+        <nav class="post-nav" aria-label="이전 및 다음 글">
+          {older ? <a href={postUrl(older)}>← 이전 글<br /><strong>{older.data.title}</strong></a> : <span></span>}
+          {newer && <a href={postUrl(newer)}>다음 글 →<br /><strong>{newer.data.title}</strong></a>}
+        </nav>
+      </footer>
+      {post.data.comments !== false && (
+        <section class="comments" aria-label="댓글">
+          <script
+            is:inline
+            src="https://giscus.app/client.js"
+            data-repo="xoruddl/xoruddl.github.io"
+            data-repo-id="R_kgDOTzWP3g"
+            data-category="Announcements"
+            data-category-id="DIC_kwDOTzWP3s4DEW1k"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="preferred_color_scheme"
+            data-lang="ko"
+            crossorigin="anonymous"
+            async></script>
+        </section>
+      )}
+    </article>
+    {toc.length > 0 && (
+      <aside class="toc" aria-label="목차">
+        <strong>이 글의 목차</strong>
+        <ol>{toc.map((heading) => <li class={`depth-${heading.depth}`}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+      </aside>
+    )}
+  </div>
+</BaseLayout>

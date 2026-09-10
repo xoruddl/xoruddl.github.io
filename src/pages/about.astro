@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { asList, sortPosts } from '../lib/posts';
+import { SITE } from '../lib/site';
+
+const posts = sortPosts(await getCollection('posts'));
+const categories = new Set(posts.flatMap((post) => asList(post.data.categories)));
+const tags = new Set(posts.flatMap((post) => asList(post.data.tags)));
+---
+
+<BaseLayout title="소개">
+  <div class="content-shell">
+    <header class="page-header"><p class="eyebrow">ABOUT</p><h1>{SITE.author}</h1><p>다른 사람에게 설명할 수 있을 때까지 이해하는 것을 목표로 학습합니다.</p></header>
+    <div class="about-card">
+      <h2>배우고 기록하는 백엔드 개발자</h2>
+      <p>확장 가능한 시스템의 구조와 성능 최적화에 관심이 있습니다. Java, Spring, 컨테이너와 Kubernetes를 중심으로 공부하며, 직접 확인한 과정과 시행착오를 이곳에 남깁니다.</p>
+      <p><a href={SITE.github} target="_blank" rel="noreferrer">GitHub에서 프로젝트 보기 →</a></p>
+    </div>
+    <div class="stat-grid" style="margin-top: 18px">
+      <div class="stat-card"><strong>{posts.length}</strong><span>작성한 글</span></div>
+      <div class="stat-card"><strong>{categories.size}</strong><span>카테고리</span></div>
+      <div class="stat-card"><strong>{tags.size}</strong><span>태그</span></div>
+    </div>
+  </div>
+</BaseLayout>

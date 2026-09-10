@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from '../components/PostList.astro';
+import { sortPosts } from '../lib/posts';
+import { SITE } from '../lib/site';
+
+const PAGE_SIZE = 10;
+const posts = sortPosts(await getCollection('posts'));
+const shown = posts.slice(0, PAGE_SIZE);
+const pages = Math.ceil(posts.length / PAGE_SIZE);
+---
+
+<BaseLayout>
+  <div class="content-shell">
+    <section class="hero">
+      <span class="eyebrow">ENGINEERING NOTES</span>
+      <h1>배운 것을 기록하고,<br />연결해서 이해합니다.</h1>
+      <p>{SITE.description} Java, Spring, Docker, Kubernetes와 백엔드 개발 과정에서 만난 개념과 문제 해결 과정을 정리합니다.</p>
+    </section>
+    <div class="section-title"><h2>최근 글</h2><span>{posts.length}개의 기록</span></div>
+    <PostList posts={shown} />
+    {pages > 1 && <nav class="pagination" aria-label="페이지 이동"><span aria-current="page">1</span><a href="/page2/" aria-label="다음 페이지">다음</a></nav>}
+  </div>
+</BaseLayout>

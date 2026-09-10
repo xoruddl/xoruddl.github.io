@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { asList, sortPosts, taxonomySlug } from '../../lib/posts';
+
+const posts = sortPosts(await getCollection('posts'));
+const counts = new Map<string, number>();
+for (const post of posts) for (const tag of asList(post.data.tags)) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+const tags = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
+---
+
+<BaseLayout title="태그">
+  <div class="content-shell">
+    <header class="page-header"><p class="eyebrow">TAGS</p><h1>태그</h1><p>키워드로 필요한 기록을 찾아보세요.</p></header>
+    <div class="taxonomy-list">{tags.map(([name, count]) => <a href={`/tags/${taxonomySlug(name)}/`}><span>#{name}</span><small>{count}</small></a>)}</div>
+  </div>
+</BaseLayout>

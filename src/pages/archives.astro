@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatDate, postUrl, sortPosts } from '../lib/posts';
+
+const posts = sortPosts(await getCollection('posts'));
+const groups = new Map<number, typeof posts>();
+for (const post of posts) {
+  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Seoul' }).format(post.data.date));
+  groups.set(year, [...(groups.get(year) ?? []), post]);
+}
+---
+
+<BaseLayout title="아카이브">
+  <div class="content-shell">
+    <header class="page-header"><p class="eyebrow">ARCHIVES</p><h1>아카이브</h1><p>{posts.length}개의 기록을 시간순으로 모았습니다.</p></header>
+    {[...groups].map(([year, yearPosts]) => (
+      <section>
+        <h2 class="archive-year">{year}</h2>
+        <div class="archive-list">
+          {yearPosts.map((post) => <div class="archive-item"><time>{formatDate(post.data.date).replace(`${year}년 `, '')}</time><a href={postUrl(post)}>{post.data.title}</a></div>)}
+        </div>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

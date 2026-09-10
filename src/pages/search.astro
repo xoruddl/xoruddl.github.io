@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { asList, excerpt, formatDate, postUrl, sortPosts } from '../lib/posts';
+
+const posts = sortPosts(await getCollection('posts'));
+const searchItems = posts.map((post) => ({
+  title: post.data.title,
+  url: postUrl(post),
+  date: formatDate(post.data.date),
+  categories: asList(post.data.categories),
+  tags: asList(post.data.tags),
+  excerpt: excerpt(post),
+}));
+const json = JSON.stringify(searchItems).replace(/</g, '\\u003c');
+---
+
+<BaseLayout title="검색">
+  <div class="content-shell">
+    <header class="page-header"><p class="eyebrow">SEARCH</p><h1>검색</h1><p>제목, 내용 요약, 카테고리와 태그에서 검색합니다.</p></header>
+    <label><span class="sr-only">검색어</span><input class="search-box" id="search-input" type="search" placeholder="예: synchronized, Kubernetes, Docker" autofocus /></label>
+    <p class="search-status" id="search-status">검색어를 입력하세요.</p>
+    <div class="post-list" id="search-results"></div>
+    <script is:inline type="application/json" id="search-data" set:html={json}></script>
+  </div>
+  <script>
+    const input = document.querySelector<HTMLInputElement>('#search-input');
+    const status = document.querySelector<HTMLElement>('#search-status');
+    const results = document.querySelector<HTMLElement>('#search-results');
+    const dataNode = document.querySelector<HTMLScriptElement>('#search-data');
+    const items = JSON.parse(dataNode?.textContent ?? '[]');
+    const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char] ?? char);
+    input?.addEventListener('input', () => {
+      const query = input.value.trim().toLocaleLowerCase('ko');
+      if (!query) {
+        if (status) status.textContent = '검색어를 입력하세요.';
+        if (results) results.innerHTML = '';
+        return;
+      }
+      const found = items.filter((item: any) => [item.title, item.excerpt, ...item.categories, ...item.tags].join(' ').toLocaleLowerCase('ko').includes(query)).slice(0, 30);
+      if (status) status.textContent = `${found.length}개의 결과`;
+      if (results) results.innerHTML = found.map((item: any) => `<article class="post-card"><div class="post-card-meta"><time>${escapeHtml(item.date)}</time></div><h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2><p>${escapeHtml(item.excerpt)}</p></article>`).join('');
+    });
+  </script>
+</BaseLayout>

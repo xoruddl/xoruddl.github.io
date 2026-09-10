@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { asList, sortPosts, taxonomySlug } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = sortPosts(await getCollection('posts'));
+  const names = [...new Set(posts.flatMap((post) => asList(post.data.categories)))];
+  return names.map((name) => ({
+    params: { category: taxonomySlug(name) },
+    props: { name, posts: posts.filter((post) => asList(post.data.categories).includes(name)) },
+  }));
+}
+
+const { name, posts } = Astro.props;
+---
+
+<BaseLayout title={`${name} 카테고리`}>
+  <div class="content-shell">
+    <header class="page-header"><p class="eyebrow">CATEGORY</p><h1>{name}</h1><p>{posts.length}개의 글</p></header>
+    <PostList posts={posts} />
+  </div>
+</BaseLayout>

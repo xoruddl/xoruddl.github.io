@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from '../components/PostList.astro';
+import { sortPosts } from '../lib/posts';
+
+export async function getStaticPaths() {
+  const pageSize = 10;
+  const posts = sortPosts(await getCollection('posts'));
+  const totalPages = Math.ceil(posts.length / pageSize);
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => {
+    const page = index + 2;
+    return {
+      params: { page: `page${page}` },
+      props: { posts: posts.slice((page - 1) * pageSize, page * pageSize), page, totalPages },
+    };
+  });
+}
+
+const { posts, page, totalPages } = Astro.props;
+---
+
+<BaseLayout title={`글 목록 ${page}페이지`}>
+  <div class="content-shell">
+    <header class="page-header"><p class="eyebrow">POSTS</p><h1>모든 기록</h1><p>{page} / {totalPages} 페이지</p></header>
+    <PostList posts={posts} />
+    <nav class="pagination" aria-label="페이지 이동">
+      <a href={page === 2 ? '/' : `/page${page - 1}/`}>이전</a>
+      <span aria-current="page">{page}</span>
+      {page < totalPages && <a href={`/page${page + 1}/`}>다음</a>}
+    </nav>
+  </div>
+</BaseLayout>

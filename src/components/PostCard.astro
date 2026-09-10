@@ -1,0 +1,23 @@
+---
+import type { Post } from '../lib/posts';
+import { asList, excerpt, formatDate, postUrl, readingMinutes, taxonomySlug } from '../lib/posts';
+
+interface Props { post: Post }
+const { post } = Astro.props;
+const categories = asList(post.data.categories);
+---
+
+<article class="post-card">
+  <div class="post-card-meta">
+    <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+    <span>·</span>
+    <span>{readingMinutes(post)}분</span>
+  </div>
+  <h2><a href={postUrl(post)}>{post.data.title}</a></h2>
+  <p>{excerpt(post)}</p>
+  {categories.length > 0 && (
+    <div class="chips">
+      {categories.map((category) => <a href={`/categories/${taxonomySlug(category)}/`}>{category}</a>)}
+    </div>
+  )}
+</article>
