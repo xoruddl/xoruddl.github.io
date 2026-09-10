@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Pagination from '../components/Pagination.astro';
 import PostList from '../components/PostList.astro';
+import PostSearch from '../components/PostSearch.astro';
 import { PAGE_SIZE, sortPosts } from '../lib/posts';
 
 export async function getStaticPaths() {
@@ -22,8 +23,10 @@ const { posts, page, totalPages } = Astro.props;
 
 <BaseLayout title={`글 목록 ${page}페이지`}>
   <div class="content-shell">
-    <header class="page-header"><p class="eyebrow">POSTS</p><h1>모든 기록</h1><p>{page} / {totalPages} 페이지</p></header>
-    <PostList posts={posts} />
-    <Pagination current={page} total={totalPages} />
+    <PostSearch>
+      <div class="section-title"><h2>모든 기록</h2><span>{page} / {totalPages} 페이지</span></div>
+      <PostList posts={posts} />
+      <Pagination current={page} total={totalPages} />
+    </PostSearch>
   </div>
 </BaseLayout>

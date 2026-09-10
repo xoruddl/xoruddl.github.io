@@ -1,0 +1,79 @@
+---
+// 검색어가 없을 때는 slot으로 받은 기본 목록을 보여주고, 검색 중에는 결과로 바꿔 보여준다.
+---
+
+<div class="home-search">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+  <label for="home-search-input" class="sr-only">블로그 글 검색</label>
+  <input class="search-box" id="home-search-input" type="search" placeholder="제목, 카테고리, 태그로 검색" autocomplete="off" />
+</div>
+<p class="search-status home-search-status" id="home-search-status" hidden></p>
+<div class="post-list" id="home-search-results" hidden></div>
+<div id="home-default-content"><slot /></div>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('#home-search-input');
+  const status = document.querySelector<HTMLElement>('#home-search-status');
+  const results = document.querySelector<HTMLElement>('#home-search-results');
+  const defaultContent = document.querySelector<HTMLElement>('#home-default-content');
+  const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char] ?? char);
+
+  // 모든 목록 페이지가 같은 검색 데이터를 쓰므로 한 파일로 받아 두고, 처음 검색할 때 한 번만 불러온다.
+  let itemsPromise: Promise<any[]> | undefined;
+  const loadItems = () => {
+    if (!itemsPromise) {
+      itemsPromise = fetch('/search-index.json').then((response) => {
+        if (!response.ok) throw new Error(`검색 데이터 요청 실패: ${response.status}`);
+        return response.json();
+      });
+      // 실패하면 다음 입력 때 다시 요청할 수 있게 비워 둔다.
+      itemsPromise.catch(() => { itemsPromise = undefined; });
+    }
+    return itemsPromise;
+  };
+
+  const normalize = (value: string) => value.trim().toLocaleLowerCase('ko');
+
+  const render = async () => {
+    if (!input || !status || !results || !defaultContent) return;
+    const query = normalize(input.value);
+    const isSearching = query.length > 0;
+
+    defaultContent.hidden = isSearching;
+    status.hidden = !isSearching;
+    results.hidden = !isSearching;
+    if (!isSearching) {
+      results.innerHTML = '';
+      return;
+    }
+
+    let items: any[];
+    try {
+      items = await loadItems();
+    } catch {
+      status.textContent = '검색 데이터를 불러오지 못했습니다.';
+      return;
+    }
+    // 데이터를 받는 사이 검색어가 바뀌었다면 뒤늦게 도착한 이전 결과는 버린다.
+    if (normalize(input.value) !== query) return;
+
+    const found = items
+      .filter((item) => [item.title, item.excerpt, ...item.categories.map((category: any) => category.name), ...item.tags].join(' ').toLocaleLowerCase('ko').includes(query))
+      .slice(0, 30);
+
+    status.textContent = found.length > 0 ? `${found.length}개의 검색 결과` : '검색 결과가 없습니다.';
+    results.innerHTML = found.map((item) => `
+      <article class="post-card">
+        <div class="post-card-meta"><time>${escapeHtml(item.date)}</time><span>·</span><span>${item.minutes}분</span></div>
+        <h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2>
+        <p>${escapeHtml(item.excerpt)}</p>
+        ${item.categories.length > 0 ? `<div class="chips">${item.categories.map((category: any) => `<a href="${encodeURI(category.url)}">${escapeHtml(category.name)}</a>`).join('')}</div>` : ''}
+      </article>
+    `).join('');
+  };
+
+  input?.addEventListener('input', render);
+  input?.addEventListener('focus', () => { loadItems().catch(() => {}); }, { once: true });
+  // 뒤로 가기로 돌아와 브라우저가 검색어를 복원한 경우에도 결과를 다시 보여준다.
+  if (input?.value) render();
+</script>
