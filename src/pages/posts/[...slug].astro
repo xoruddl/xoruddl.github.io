@@ -78,4 +78,36 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
       </aside>
     )}
   </div>
+  <script>
+    // 코드 블록마다 전체 내용을 한 번에 복사하는 버튼을 붙인다. pre는 가로 스크롤이 있어 버튼은 바깥 래퍼에 둔다.
+    document.querySelectorAll<HTMLPreElement>('.post-content pre').forEach((pre) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.before(wrapper);
+      wrapper.append(pre);
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'code-copy';
+      button.textContent = '복사';
+      wrapper.append(button);
+
+      let timer: number | undefined;
+      button.addEventListener('click', async () => {
+        const code = pre.querySelector('code') ?? pre;
+        try {
+          await navigator.clipboard.writeText(code.textContent ?? '');
+          button.textContent = '복사됨';
+        } catch {
+          button.textContent = '복사 실패';
+        }
+        button.classList.add('is-done');
+        clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          button.textContent = '복사';
+          button.classList.remove('is-done');
+        }, 1800);
+      });
+    });
+  </script>
 </BaseLayout>
