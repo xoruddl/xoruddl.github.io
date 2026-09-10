@@ -195,6 +195,10 @@ img { max-width: 100%; height: auto; }
 .search-box { width: 100%; padding: 14px 17px; border: 1px solid var(--line); border-radius: 13px; outline: none; background: var(--surface); color: var(--text); }
 .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .search-status { margin: 12px 2px 20px; color: var(--muted); font-size: .85rem; }
+.home-search { position: relative; margin-bottom: 28px; }
+.home-search svg { position: absolute; top: 50%; left: 17px; width: 20px; transform: translateY(-50%); fill: none; stroke: var(--muted); stroke-linecap: round; stroke-width: 1.8; pointer-events: none; }
+.home-search .search-box { padding-left: 48px; font-size: .94rem; }
+.home-search-status { margin-top: -10px; }
 .about-card { padding: 32px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .about-card h2 { margin-top: 0; }
 .empty-state { padding: 28px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; }
