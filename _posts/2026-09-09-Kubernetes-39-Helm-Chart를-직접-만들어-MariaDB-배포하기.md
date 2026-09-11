@@ -13,8 +13,6 @@ Chart를 만든다는 말은 대단해 보이지만, 실제로는 **이미 쓰�
 ---
 
 
-{% raw %}
-
 ## 1. Chart는 세 부분으로 이루어진다
 
 Chart 디렉터리를 열어 보면 이름은 여러 개지만, 처음 이해해야 할 것은 세 가지이다.
@@ -353,5 +351,3 @@ kubectl get pv
 Chart는 `Chart.yaml`, `values.yaml`, `templates/` 세 부분으로 이루어진다. 템플릿에 빈칸을 만들고 `values.yaml`에 기본값을 모아 두면, Helm이 완성된 Kubernetes YAML을 만들어 설치한다.
 
 처음에는 `.Values`, `.Release.Name`, `| quote`, `{{- if }}`만 익혀도 충분하다. 만든 뒤에는 `helm lint`와 `helm template`으로 결과를 확인하고 설치하는 습관을 들이자.
-
-{% endraw %}
