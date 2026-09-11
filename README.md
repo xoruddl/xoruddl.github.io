@@ -2,7 +2,7 @@
 
 개발 과정에서 공부하고 확인한 내용을 정리하는 기술 블로그입니다.
 
-**블로그:** [https://xoruddl.github.io](https://xoruddl.github.io)
+**블로그:** [https://etakyung.com](https://etakyung.com)
 
 ## 기술 구성
 
@@ -30,11 +30,11 @@ npm run build
 
 ## 최근 글
 
-- [Kubernetes (39) - Helm Chart를 직접 만들어 MariaDB 배포하기](https://xoruddl.github.io/posts/Kubernetes-39-Helm-Chart%EB%A5%BC-%EC%A7%81%EC%A0%91-%EB%A7%8C%EB%93%A4%EC%96%B4-MariaDB-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0/)
-- [Kubernetes (38) - Helm Chart로 Kubernetes 애플리케이션 설치와 설정 관리하기](https://xoruddl.github.io/posts/Kubernetes-38-Helm-Chart%EB%A1%9C-Kubernetes-%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EC%84%A4%EC%B9%98%EC%99%80-%EC%84%A4%EC%A0%95-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0/)
-- [Kubernetes (37) - Kustomize로 환경별 매니페스트 구성 관리하기](https://xoruddl.github.io/posts/Kubernetes-37-Kustomize%EB%A1%9C-%ED%99%98%EA%B2%BD%EB%B3%84-%EB%A7%A4%EB%8B%88%ED%8E%98%EC%8A%A4%ED%8A%B8-%EA%B5%AC%EC%84%B1-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0/)
+- [Kubernetes (39) - Helm Chart를 직접 만들어 MariaDB 배포하기](https://etakyung.com/posts/Kubernetes-39-Helm-Chart%EB%A5%BC-%EC%A7%81%EC%A0%91-%EB%A7%8C%EB%93%A4%EC%96%B4-MariaDB-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0/)
+- [Kubernetes (38) - Helm Chart로 Kubernetes 애플리케이션 설치와 설정 관리하기](https://etakyung.com/posts/Kubernetes-38-Helm-Chart%EB%A1%9C-Kubernetes-%EC%95%A0%ED%94%8C%EB%A6%AC%EC%BC%80%EC%9D%B4%EC%85%98-%EC%84%A4%EC%B9%98%EC%99%80-%EC%84%A4%EC%A0%95-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0/)
+- [Kubernetes (37) - Kustomize로 환경별 매니페스트 구성 관리하기](https://etakyung.com/posts/Kubernetes-37-Kustomize%EB%A1%9C-%ED%99%98%EA%B2%BD%EB%B3%84-%EB%A7%A4%EB%8B%88%ED%8E%98%EC%8A%A4%ED%8A%B8-%EA%B5%AC%EC%84%B1-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0/)
 
-전체 글은 블로그의 [카테고리](https://xoruddl.github.io/categories/)와 [태그](https://xoruddl.github.io/tags/)에서 확인할 수 있습니다.
+전체 글은 블로그의 [카테고리](https://etakyung.com/categories/)와 [태그](https://etakyung.com/tags/)에서 확인할 수 있습니다.
 
 ## 댓글
 
