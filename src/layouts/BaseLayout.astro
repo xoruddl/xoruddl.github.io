@@ -22,6 +22,17 @@ const canonicalUrl = new URL(canonical, SITE.url);
 <!doctype html>
 <html lang="ko" data-theme="light">
   <head>
+    {import.meta.env.PROD && (
+      <>
+        <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-89WTW8JGQW"></script>
+        <script is:inline>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-89WTW8JGQW');
+        </script>
+      </>
+    )}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
