@@ -201,8 +201,20 @@ img { max-width: 100%; height: auto; }
 .category-children .category-link:last-child { border-bottom: 0; }
 .category-children[hidden] { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.archive-year { margin: 32px 0 10px; color: var(--accent); font-size: 1.3rem; }
-.archive-list { border-left: 1px solid var(--line); margin-left: 7px; padding-left: 22px; }
+.archive-year-section { margin-top: 18px; }
+.archive-year, .archive-month { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.archive-year > summary, .archive-month > summary { display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; }
+.archive-year > summary::-webkit-details-marker, .archive-month > summary::-webkit-details-marker { display: none; }
+.archive-year > summary { padding: 18px 20px; }
+.archive-year h2, .archive-month h3 { margin: 0; color: var(--accent); }
+.archive-year h2 { font-size: 1.3rem; }
+.archive-year summary span, .archive-month summary span { color: var(--muted); font-size: .82rem; }
+.archive-months { display: grid; gap: 10px; padding: 0 14px 14px; }
+.archive-month > summary { padding: 13px 14px; }
+.archive-month h3 { font-size: 1rem; }
+.archive-list { border-left: 1px solid var(--line); margin: 0 14px 14px 21px; padding-left: 18px; }
+.archive-more { margin-top: 8px; }
+.archive-more summary { color: var(--accent); cursor: pointer; font-size: .88rem; }
 .archive-item { display: grid; grid-template-columns: 68px 1fr; gap: 15px; padding: 9px 0; }
 .archive-item time { color: var(--muted); font-size: .78rem; }
 .archive-item a { font-size: .94rem; }

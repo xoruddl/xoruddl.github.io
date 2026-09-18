@@ -4,22 +4,55 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { formatDate, postUrl, sortPosts } from '../lib/posts';
 
 const posts = sortPosts(await getCollection('posts'));
-const groups = new Map<number, typeof posts>();
+const groups = new Map<number, Map<number, typeof posts>>();
 for (const post of posts) {
-  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Seoul' }).format(post.data.date));
-  groups.set(year, [...(groups.get(year) ?? []), post]);
+  const parts = new Intl.DateTimeFormat('en', {
+    year: 'numeric',
+    month: 'numeric',
+    timeZone: 'Asia/Seoul',
+  }).formatToParts(post.data.date);
+  const year = Number(parts.find((part) => part.type === 'year')?.value);
+  const month = Number(parts.find((part) => part.type === 'month')?.value);
+  const months = groups.get(year) ?? new Map<number, typeof posts>();
+  months.set(month, [...(months.get(month) ?? []), post]);
+  groups.set(year, months);
 }
+
+const latestYear = groups.keys().next().value;
+const latestMonth = latestYear ? groups.get(latestYear)?.keys().next().value : undefined;
+const initialPostCount = 8;
 ---
 
 <BaseLayout title="아카이브">
   <div class="content-shell">
     <header class="page-header"><p class="eyebrow">ARCHIVES</p><h1>아카이브</h1><p>{posts.length}개의 기록을 시간순으로 모았습니다.</p></header>
-    {[...groups].map(([year, yearPosts]) => (
-      <section>
-        <h2 class="archive-year">{year}</h2>
-        <div class="archive-list">
-          {yearPosts.map((post) => <div class="archive-item"><time>{formatDate(post.data.date).replace(`${year}년 `, '')}</time><a href={postUrl(post)}>{post.data.title}</a></div>)}
-        </div>
+    {[...groups].map(([year, months]) => (
+      <section class="archive-year-section">
+        <details class="archive-year" open={year === latestYear}>
+          <summary><h2>{year}년</h2><span>{[...months.values()].flat().length}개 글</span></summary>
+          <div class="archive-months">
+            {[...months].map(([month, monthPosts]) => {
+              const isLatestMonth = year === latestYear && month === latestMonth;
+              const visiblePosts = isLatestMonth ? monthPosts.slice(0, initialPostCount) : monthPosts;
+              const hiddenPosts = isLatestMonth ? monthPosts.slice(initialPostCount) : [];
+
+              return (
+                <details class="archive-month" open={isLatestMonth}>
+                  <summary><h3>{month}월</h3><span>{monthPosts.length}개 글</span></summary>
+                  <div class="archive-list">
+                    {visiblePosts.map((post) => <div class="archive-item"><time>{formatDate(post.data.date).replace(`${year}년 ${month}월 `, '')}</time><a href={postUrl(post)}>{post.data.title}</a></div>)}
+                    {hiddenPosts.length > 0 && (
+                      <details class="archive-more">
+                        <summary>나머지 {hiddenPosts.length}개 글 보기</summary>
+                        {hiddenPosts.map((post) => <div class="archive-item"><time>{formatDate(post.data.date).replace(`${year}년 ${month}월 `, '')}</time><a href={postUrl(post)}>{post.data.title}</a></div>)}
+                      </details>
+                    )}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </details>
       </section>
     ))}
   </div>
