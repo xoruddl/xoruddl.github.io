@@ -5,12 +5,27 @@ import { asList, sortPosts, taxonomySlug } from '../../lib/posts';
 
 const posts = sortPosts(await getCollection('posts'));
 const counts = new Map<string, number>();
-for (const post of posts) for (const category of asList(post.data.categories)) counts.set(category, (counts.get(category) ?? 0) + 1);
-const categories = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
+const categoryGroups = new Map<string, string[]>();
 
-const categoryGroups = new Map([
-  ['Spring', ['Kafka', '스프링 핵심 원리 기본편']],
-]);
+for (const post of posts) {
+  const categoryPath = asList(post.data.categories);
+
+  for (const category of categoryPath) {
+    counts.set(category, (counts.get(category) ?? 0) + 1);
+  }
+
+  // categories: [상위, 하위] 형식의 순서를 카테고리 트리로 사용한다.
+  for (let index = 0; index < categoryPath.length - 1; index += 1) {
+    const parent = categoryPath[index];
+    const child = categoryPath[index + 1];
+    const children = categoryGroups.get(parent) ?? [];
+
+    if (!children.includes(child)) children.push(child);
+    categoryGroups.set(parent, children);
+  }
+}
+
+const categories = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
 const childCategories = new Set([...categoryGroups.values()].flat());
 const compareCategoryNames = (a: string, b: string) => {
   const aStartsWithLatin = /^[A-Za-z]/.test(a);
