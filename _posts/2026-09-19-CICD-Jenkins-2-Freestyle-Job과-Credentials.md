@@ -35,6 +35,8 @@ Build를 실행할 때마다 Jenkins는 고유한 빌드 번호와 콘솔 로그
 
 **Manage Jenkins → Credentials**에서 용도에 맞는 자격 증명을 추가한다.
 
+![Jenkins Credentials 목록](/assets/img/posts/2026-09-19-CICD-Jenkins-2-Freestyle-Job과-Credentials/credentials-list.png)
+
 | 종류 | 적합한 값 | 예시 |
 | --- | --- | --- |
 | Secret text | 토큰 한 개 | GitHub PAT, SonarQube 토큰 |
@@ -59,7 +61,21 @@ chmod +x gradlew
 
 첫 줄은 실행 권한 정보가 없는 환경에서 내려받은 Gradle Wrapper를 실행 가능하게 한다. 두 번째 줄은 이전 산출물을 정리한 뒤 테스트까지 실행한다. 패키지 파일도 만들고 싶다면 테스트가 통과한 뒤 `./gradlew bootJar --no-daemon` 또는 프로젝트에 맞는 패키징 명령을 추가한다.
 
-**Build Now**를 눌러 실행하고, 왼쪽 빌드 번호를 선택한 뒤 **Console Output**을 연다. `BUILD SUCCESSFUL`이 보이면 Jenkins가 저장소를 가져오고 Gradle 빌드를 실행한 것이다.
+**Build Now**를 눌러 실행하고, 왼쪽 빌드 번호를 선택한 뒤 **Console Output**을 연다. 테스트가 실패하면 Gradle은 실패한 테스트 이름과 위치를 출력하고, Jenkins는 해당 Build를 실패로 표시한다.
+
+![Jenkins Console Output의 테스트 실패 결과](/assets/img/posts/2026-09-19-CICD-Jenkins-2-Freestyle-Job과-Credentials/test-failure-console.png)
+
+예를 들어 아래 테스트는 실제 응답인 `hello jenkins` 대신 `hello`를 기대하도록 작성되어 있으므로 실패한다. 콘솔의 `HelloControllerTest.java:12`처럼 표시된 위치를 확인하면 원인을 빠르게 찾을 수 있다.
+
+![실패를 재현한 HelloControllerTest 코드](/assets/img/posts/2026-09-19-CICD-Jenkins-2-Freestyle-Job과-Credentials/test-code-failure.png)
+
+기대값을 실제 요구 사항에 맞게 수정하고 저장소에 반영한다.
+
+![기대값을 수정한 HelloControllerTest 코드](/assets/img/posts/2026-09-19-CICD-Jenkins-2-Freestyle-Job과-Credentials/test-code-fixed.png)
+
+다시 Build를 실행해 `BUILD SUCCESSFUL`과 Jenkins의 `Finished: SUCCESS`를 확인한다. 이처럼 Jenkins는 코드를 가져와 빌드뿐 아니라 테스트 실패 여부까지 일관된 로그로 남긴다.
+
+![Jenkins Console Output의 성공 결과](/assets/img/posts/2026-09-19-CICD-Jenkins-2-Freestyle-Job과-Credentials/build-success-console.png)
 
 ---
 
