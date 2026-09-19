@@ -1,13 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { asList, excerpt, formatDate, postUrl, sortPosts } from '../lib/posts';
+import { asList, excerpt, formatShortDate, postUrl, sortPosts } from '../lib/posts';
 
 const posts = sortPosts(await getCollection('posts'));
 const searchItems = posts.map((post) => ({
   title: post.data.title,
   url: postUrl(post),
-  date: formatDate(post.data.date),
+  date: formatShortDate(post.data.date),
   categories: asList(post.data.categories),
   tags: asList(post.data.tags),
   excerpt: excerpt(post),
@@ -39,7 +39,7 @@ const json = JSON.stringify(searchItems).replace(/</g, '\\u003c');
       }
       const found = items.filter((item: any) => [item.title, item.excerpt, ...item.categories, ...item.tags].join(' ').toLocaleLowerCase('ko').includes(query)).slice(0, 30);
       if (status) status.textContent = `${found.length}개의 결과`;
-      if (results) results.innerHTML = found.map((item: any) => `<article class="post-card"><div class="post-card-meta"><time>${escapeHtml(item.date)}</time></div><h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2><p>${escapeHtml(item.excerpt)}</p></article>`).join('');
+      if (results) results.innerHTML = found.map((item: any) => `<article class="post-card"><div class="post-card-body"><h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2><p>${escapeHtml(item.excerpt)}</p><div class="post-card-meta"><time>${escapeHtml(item.date)}</time></div></div></article>`).join('');
     });
   </script>
 </BaseLayout>

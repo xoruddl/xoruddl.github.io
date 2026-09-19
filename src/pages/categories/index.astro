@@ -1,52 +1,16 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { asList, sortPosts, taxonomySlug } from '../../lib/posts';
+import { categoryTree, sortPosts, taxonomySlug } from '../../lib/posts';
 
-const posts = sortPosts(await getCollection('posts'));
-const counts = new Map<string, number>();
-const categoryGroups = new Map<string, string[]>();
-
-for (const post of posts) {
-  const categoryPath = asList(post.data.categories);
-
-  for (const category of categoryPath) {
-    counts.set(category, (counts.get(category) ?? 0) + 1);
-  }
-
-  // categories: [상위, 하위] 형식의 순서를 카테고리 트리로 사용한다.
-  for (let index = 0; index < categoryPath.length - 1; index += 1) {
-    const parent = categoryPath[index];
-    const child = categoryPath[index + 1];
-    const children = categoryGroups.get(parent) ?? [];
-
-    if (!children.includes(child)) children.push(child);
-    categoryGroups.set(parent, children);
-  }
-}
-
-const categories = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
-const childCategories = new Set([...categoryGroups.values()].flat());
-const compareCategoryNames = (a: string, b: string) => {
-  const aStartsWithLatin = /^[A-Za-z]/.test(a);
-  const bStartsWithLatin = /^[A-Za-z]/.test(b);
-  if (aStartsWithLatin !== bStartsWithLatin) return aStartsWithLatin ? -1 : 1;
-  return a.localeCompare(b, aStartsWithLatin ? 'en' : 'ko', { sensitivity: 'base' });
-};
-const topLevelCategories = categories
-  .filter(([name]) => !childCategories.has(name))
-  .sort(([a], [b]) => compareCategoryNames(a, b));
+const topLevelCategories = categoryTree(sortPosts(await getCollection('posts')));
 ---
 
 <BaseLayout title="카테고리">
   <div class="content-shell">
     <header class="page-header"><p class="eyebrow">CATEGORIES</p><h1>카테고리</h1><p>주제별로 기록을 모았습니다.</p></header>
     <div class="category-tree">
-      {topLevelCategories.map(([name, count]) => {
-        const children = (categoryGroups.get(name) ?? [])
-          .map((childName) => [childName, counts.get(childName)] as const)
-          .filter((entry): entry is readonly [string, number] => entry[1] !== undefined)
-          .sort(([a], [b]) => compareCategoryNames(a, b));
+      {topLevelCategories.map(({ name, count, children }) => {
         const hasChildren = children.length > 0;
         const childListId = `category-children-${taxonomySlug(name)}`;
 
@@ -68,7 +32,7 @@ const topLevelCategories = categories
             </div>
             {hasChildren && (
               <div class="category-children" id={childListId}>
-                {children.map(([childName, childCount]) => (
+                {children.map(({ name: childName, count: childCount }) => (
                   <a class="category-link" href={`/categories/${taxonomySlug(childName)}/`}>
                     <svg class="category-folder" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5A1.5 1.5 0 0 1 5 5h5l2 2h7A1.5 1.5 0 0 1 20.5 8.5v9A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z" /></svg>
                     <span class="category-name">{childName}</span>

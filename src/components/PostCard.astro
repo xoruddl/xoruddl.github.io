@@ -1,23 +1,24 @@
 ---
 import type { Post } from '../lib/posts';
-import { asList, excerpt, formatDate, postUrl, readingMinutes, taxonomySlug } from '../lib/posts';
+import { asList, excerpt, formatShortDate, postUrl, readingMinutes, taxonomySlug, thumbnail } from '../lib/posts';
 
 interface Props { post: Post }
 const { post } = Astro.props;
-const categories = asList(post.data.categories);
+// [상위, 하위] 중 가장 구체적인 카테고리를 목록에 표시한다.
+const category = asList(post.data.categories).at(-1);
+const thumb = thumbnail(post);
 ---
 
 <article class="post-card">
-  <div class="post-card-meta">
-    <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-    <span>·</span>
-    <span>{readingMinutes(post)}분</span>
-  </div>
-  <h2><a href={postUrl(post)}>{post.data.title}</a></h2>
-  <p>{excerpt(post)}</p>
-  {categories.length > 0 && (
-    <div class="chips">
-      {categories.map((category) => <a href={`/categories/${taxonomySlug(category)}/`}>{category}</a>)}
+  <div class="post-card-body">
+    {category && <a class="post-card-category" href={`/categories/${taxonomySlug(category)}/`}>{category}</a>}
+    <h2><a href={postUrl(post)}>{post.data.title}</a></h2>
+    <p>{excerpt(post)}</p>
+    <div class="post-card-meta">
+      <time datetime={post.data.date.toISOString()}>{formatShortDate(post.data.date)}</time>
+      <span>·</span>
+      <span>{readingMinutes(post)}분</span>
     </div>
-  )}
+  </div>
+  {thumb && <img class="post-card-thumb" src={thumb} alt="" loading="lazy" decoding="async" />}
 </article>

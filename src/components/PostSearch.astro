@@ -62,14 +62,19 @@
       .slice(0, 30);
 
     status.textContent = found.length > 0 ? `${found.length}개의 검색 결과` : '검색 결과가 없습니다.';
-    results.innerHTML = found.map((item) => `
+    results.innerHTML = found.map((item) => {
+      const category = item.categories.at(-1);
+      return `
       <article class="post-card">
-        <div class="post-card-meta"><time>${escapeHtml(item.date)}</time><span>·</span><span>${item.minutes}분</span></div>
-        <h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2>
-        <p>${escapeHtml(item.excerpt)}</p>
-        ${item.categories.length > 0 ? `<div class="chips">${item.categories.map((category: any) => `<a href="${encodeURI(category.url)}">${escapeHtml(category.name)}</a>`).join('')}</div>` : ''}
+        <div class="post-card-body">
+          ${category ? `<a class="post-card-category" href="${encodeURI(category.url)}">${escapeHtml(category.name)}</a>` : ''}
+          <h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2>
+          <p>${escapeHtml(item.excerpt)}</p>
+          <div class="post-card-meta"><time>${escapeHtml(item.date)}</time><span>·</span><span>${item.minutes}분</span></div>
+        </div>
       </article>
-    `).join('');
+    `;
+    }).join('');
   };
 
   input?.addEventListener('input', render);

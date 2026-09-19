@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import { asList, categoryTree, formatShortDate, postUrl, sortPosts, taxonomySlug } from '../lib/posts';
+import { SITE } from '../lib/site';
+
+const posts = sortPosts(await getCollection('posts'));
+const categories = categoryTree(posts);
+const recent = posts.slice(0, 5);
+const tagCounts = new Map<string, number>();
+for (const post of posts) for (const tag of asList(post.data.tags)) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+const topTags = [...tagCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko')).slice(0, 24);
+---
+
+<aside class="sidebar" aria-label="블로그 정보">
+  <section class="widget profile">
+    <a href="/about/" aria-label="소개 페이지로 이동">
+      <img src="/assets/img/avatar.jpg" alt="eta_kyung 프로필" width="88" height="88" />
+    </a>
+    <strong>{SITE.author}</strong>
+    <p>{SITE.tagline}</p>
+    <div class="profile-links">
+      <a href={SITE.github} target="_blank" rel="noreferrer">GitHub</a>
+      <a href="/feed.xml">RSS</a>
+    </div>
+  </section>
+
+  <section class="widget">
+    <h2 class="widget-title"><a href="/categories/">분류 전체보기 <span>({posts.length})</span></a></h2>
+    <ul class="widget-categories">
+      {categories.map(({ name, count, children }) => (
+        <li>
+          <a href={`/categories/${taxonomySlug(name)}/`}>{name} <span>({count})</span></a>
+          {children.length > 0 && (
+            <ul>
+              {children.map((child) => <li><a href={`/categories/${taxonomySlug(child.name)}/`}>{child.name} <span>({child.count})</span></a></li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="widget">
+    <h2 class="widget-title">최근 글</h2>
+    <ul class="widget-recent">
+      {recent.map((post) => (
+        <li><a href={postUrl(post)}>{post.data.title}</a><time datetime={post.data.date.toISOString()}>{formatShortDate(post.data.date)}</time></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="widget">
+    <h2 class="widget-title"><a href="/tags/">태그</a></h2>
+    <div class="widget-tags">
+      {topTags.map(([name]) => <a href={`/tags/${taxonomySlug(name)}/`}>{name}</a>)}
+    </div>
+  </section>
+
+  <slot />
+</aside>
