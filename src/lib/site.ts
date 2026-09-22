@@ -6,4 +6,5 @@ export const SITE = {
   author: 'eta_kyung',
   github: 'https://github.com/xoruddl',
   googleVerification: 'nja8kDKfaacxQYsnLHiC7RvTAg9D06Q_7hfeN5bRMjc',
+  naverVerification: '848748af71127087ada875af7326465feaa988bd',
 } as const;
