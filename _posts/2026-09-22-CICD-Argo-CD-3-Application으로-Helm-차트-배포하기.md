@@ -120,7 +120,21 @@ ssh -N -L 8081:127.0.0.1:8081 etakyung@k8s-master
 
 Web UI에서도 `nginx-app`을 열어 Sync Status와 Health Status를 확인한다. `Synced`는 차트에서 계산한 원하는 상태와 현재 상태가 일치함을, `Healthy`는 리소스가 정상 동작 상태로 판단됨을 의미한다. 두 상태는 다른 개념이므로 함께 확인해야 한다.
 
-## 6. 실습 리소스를 정리한다
+## 6. 이 실습에서 한 일
+
+이 실습에서 직접 NGINX를 설치한 주체는 사용자가 아니라 Argo CD다. `nginx-app` Application에 "어느 차트를, 어디에, 어떤 설정으로 배포할지"를 선언했고, Argo CD가 그 선언을 읽어 Kubernetes 리소스를 만들었다.
+
+| 만든 것 | 의미 |
+| --- | --- |
+| `nginx-app` Application | Argo CD가 관리하는 배포 단위다. `argocd` namespace에 생성된다. |
+| NGINX Helm 차트 배포 | Argo CD가 Bitnami Helm 저장소에서 차트 `22.6.5`를 받아 Kubernetes 매니페스트로 렌더링한다. |
+| `nginx-deploy` namespace | 렌더링된 NGINX Deployment, Service, Pod가 배포되는 대상 namespace다. |
+| NGINX Pod 2개 | `replicaCount: "2"` 설정에 따라 실행되는 애플리케이션 인스턴스다. |
+| 자동 동기화 정책 | 차트의 원하는 상태와 클러스터 상태가 달라지면 Argo CD가 상태를 다시 맞춘다. |
+
+따라서 이 방식은 터미널에서 `helm install`을 한 번 실행하고 끝내는 배포와 다르다. Argo CD가 차트 버전과 설정을 기준으로 상태를 계속 비교하고, Web UI에서 그 결과를 `Synced`와 `Healthy` 상태로 보여 준다.
+
+## 7. 실습 리소스를 정리한다
 
 다음 글의 실습과 독립적으로 진행하려면 NGINX Application과 namespace를 삭제한다. 이 명령은 `nginx-deploy` namespace 안의 리소스를 모두 삭제한다.
 
@@ -131,8 +145,6 @@ kubectl delete namespace nginx-deploy
 
 ---
 
-## 7. 정리
+## 8. 정리
 
 Application은 소스, 대상 클러스터, 동기화 정책을 한 리소스로 정의한다. Helm 차트의 값도 Application에서 선언할 수 있으며, Argo CD는 그 결과와 클러스터 상태를 지속적으로 비교한다.
-
-다음 글에서는 Helm 차트가 아니라 GitHub 저장소에 직접 작성한 Kubernetes 매니페스트를 Argo CD로 동기화한다.
