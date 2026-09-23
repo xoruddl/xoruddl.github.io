@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "kubectl", "namespace", "context", "kubeconfig", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 Kubernetes에서 Namespace는 하나의 클러스터 안에서 리소스를 논리적으로 분리하는 단위다. 같은 이름의 Pod라도 서로 다른 Namespace에 만들 수 있어, 개발·운영 환경이나 팀별 리소스를 구분하는 데 유용하다.
 
 이번 글에서는 Namespace 목록을 확인하고, `blue`와 `orange` Namespace를 만든 뒤 Pod를 배치하는 과정을 정리한다. 또한 kubeconfig의 context에 기본 Namespace를 연결해 매번 `-n` 옵션을 쓰지 않는 방법도 함께 살펴본다.
@@ -75,36 +78,59 @@ kubectl create namespace orange --dry-run=client -o yaml
 
 `--dry-run=client`를 사용하면 API 서버에 리소스를 만들지 않고 클라이언트에서 YAML만 생성한다. `--dry-run`만 사용하는 이전 형식은 더 이상 권장되지 않는다.
 
-다음처럼 파일로 저장해 선언적으로 생성할 수도 있다.
+다음 명령으로 `orange-namespace.yaml` 파일을 만든다.
 
-```yaml
+```bash
+cat <<'EOF' > orange-namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: orange
+EOF
 ```
 
 ```bash
-kubectl create -f orange-ns.yaml
+kubectl apply -f orange-namespace.yaml
+```
+
+```bash
 kubectl get namespaces
 ```
 
-반복해서 관리할 리소스는 YAML 파일을 버전 관리하고 `kubectl apply -f orange-ns.yaml`로 반영하는 방식이 편리하다.
+반복해서 관리할 리소스는 YAML 파일을 버전 관리하고 `kubectl apply -f orange-namespace.yaml`로 반영하는 방식이 편리하다.
 
 ---
 
 ## 4. 원하는 Namespace에 Pod 배치하기
 
-Pod와 같은 Namespace 범위 리소스는 명령어의 `-n` 옵션으로 생성 위치를 지정할 수 있다.
+Pod와 같은 Namespace 범위 리소스는 명령어의 `-n` 옵션으로 생성 위치를 지정할 수 있다. 먼저 Namespace를 적지 않은 Pod 매니페스트를 `nginx.yaml` 파일로 만든다.
 
 ```bash
-# blue Namespace에 nginx.yaml의 Pod 생성
-kubectl create -f nginx.yaml -n blue
+cat <<'EOF' > nginx.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: webserver
+      image: nginx:1.14
+      ports:
+        - containerPort: 80
+EOF
+```
+
+```bash
+# blue Namespace에 nginx.yaml 파일로 정의한 Pod 생성
+kubectl apply -f nginx.yaml -n blue
 ```
 
 매니페스트의 `metadata.namespace`에 Namespace를 적는 방법도 있다.
 
-```yaml
+다음 명령으로 `orange-mypod.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > orange-mypod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -118,10 +144,14 @@ spec:
       image: nginx:1.14
       ports:
         - containerPort: 80
+EOF
 ```
 
 ```bash
-kubectl create -f nginx.yaml
+kubectl apply -f orange-mypod.yaml
+```
+
+```bash
 kubectl get pods -n orange
 ```
 
