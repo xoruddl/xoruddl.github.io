@@ -12,6 +12,7 @@ export const GET: APIRoute = async () => {
     categories: asList(post.data.categories).map((name) => ({ name, url: `/categories/${taxonomySlug(name)}/` })),
     tags: asList(post.data.tags),
     excerpt: excerpt(post),
+    content: post.body ?? '',
   }));
 
   return new Response(JSON.stringify(items), { headers: { 'Content-Type': 'application/json; charset=utf-8' } });

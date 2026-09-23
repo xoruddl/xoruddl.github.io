@@ -11,13 +11,14 @@ const searchItems = posts.map((post) => ({
   categories: asList(post.data.categories),
   tags: asList(post.data.tags),
   excerpt: excerpt(post),
+  content: post.body ?? '',
 }));
 const json = JSON.stringify(searchItems).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout title="검색">
   <div class="content-shell">
-    <header class="page-header"><p class="eyebrow">SEARCH</p><h1>검색</h1><p>제목, 내용 요약, 카테고리와 태그에서 검색합니다.</p></header>
+    <header class="page-header"><p class="eyebrow">SEARCH</p><h1>검색</h1><p>제목, 본문 전체(코드 포함), 카테고리와 태그에서 검색합니다.</p></header>
     <label><span class="sr-only">검색어</span><input class="search-box" id="search-input" type="search" placeholder="예: synchronized, Kubernetes, Docker" autofocus /></label>
     <p class="search-status" id="search-status">검색어를 입력하세요.</p>
     <div class="post-list" id="search-results"></div>
@@ -37,7 +38,7 @@ const json = JSON.stringify(searchItems).replace(/</g, '\\u003c');
         if (results) results.innerHTML = '';
         return;
       }
-      const found = items.filter((item: any) => [item.title, item.excerpt, ...item.categories, ...item.tags].join(' ').toLocaleLowerCase('ko').includes(query)).slice(0, 30);
+      const found = items.filter((item: any) => [item.title, item.excerpt, item.content, ...item.categories, ...item.tags].join(' ').toLocaleLowerCase('ko').includes(query)).slice(0, 30);
       if (status) status.textContent = `${found.length}개의 결과`;
       if (results) results.innerHTML = found.map((item: any) => `<article class="post-card"><div class="post-card-body"><h2><a href="${encodeURI(item.url)}">${escapeHtml(item.title)}</a></h2><p>${escapeHtml(item.excerpt)}</p><div class="post-card-meta"><time>${escapeHtml(item.date)}</time></div></div></article>`).join('');
     });
