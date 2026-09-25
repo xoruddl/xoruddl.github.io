@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "label", "selector", "annotation", "pod", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 앞에서 Pod를 만들고 조회할 때는 리소스 이름을 사용했다. 하지만 같은 애플리케이션의 Pod가 여러 개로 늘어나거나 새 Pod로 교체되면 각각의 이름을 직접 관리하기 어렵다. Kubernetes는 Label로 리소스에 식별 정보를 붙이고, Selector로 조건에 맞는 리소스 집합을 찾는다.
 
 이 연결 방식은 뒤에서 배울 ReplicaSet, Deployment, Service의 공통 기반이다. 이번 글에서는 Label을 붙이고 조회하는 방법부터 Selector가 컨트롤러와 Service를 연결하는 방식까지 살펴본다.
@@ -17,8 +20,10 @@ tags: ["kubernetes", "label", "selector", "annotation", "pod", "쿠버네티스"
 
 Label은 Pod 같은 Kubernetes 오브젝트의 `metadata.labels`에 기록하는 키와 값이다. 하나의 리소스에 여러 Label을 붙일 수 있고, 같은 Label을 여러 리소스가 공유할 수도 있다.
 
-```yaml
-# pod-label.yaml
+다음 명령으로 `pod-label.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > pod-label.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -31,6 +36,11 @@ spec:
   containers:
     - name: nginx
       image: nginx:1.27
+EOF
+```
+
+```bash
+kubectl apply -f pod-label.yaml
 ```
 
 이 예제에서 `app`, `environment`, `tier`는 Label의 키이고 `nginx`, `dev`, `frontend`는 값이다. Label은 이름처럼 하나의 리소스를 고유하게 구분하기보다, 공통된 특징을 가진 리소스를 묶는 데 사용한다.
@@ -38,7 +48,6 @@ spec:
 매니페스트를 적용하고 Label을 함께 조회한다.
 
 ```bash
-kubectl apply -f pod-label.yaml
 kubectl get pods --show-labels
 kubectl get pod nginx-dev -L app,environment,tier
 ```
@@ -101,7 +110,10 @@ kubectl get pods --field-selector status.phase=Running
 
 ReplicaSet과 Deployment 같은 컨트롤러는 `spec.selector`에 맞는 Pod를 관리한다. 컨트롤러가 새로 만드는 Pod의 Label은 `spec.template.metadata.labels`에 정의한다.
 
-```yaml
+다음 명령으로 `nginx-rs.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > nginx-rs.yaml
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -119,6 +131,11 @@ spec:
       containers:
         - name: nginx
           image: nginx:1.27
+EOF
+```
+
+```bash
+kubectl apply -f nginx-rs.yaml
 ```
 
 여기서는 다음 두 값이 일치해야 한다.
@@ -136,7 +153,10 @@ spec.template.metadata.labels.app = nginx
 
 Service는 고정된 접근 지점을 제공하지만, 실제 요청을 받을 Pod는 Label Selector로 찾는다.
 
-```yaml
+다음 명령으로 `nginx-service.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > nginx-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -147,6 +167,11 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f nginx-service.yaml
 ```
 
 앞의 ReplicaSet과 이 Service는 모두 `app: nginx`인 Pod를 선택한다.
