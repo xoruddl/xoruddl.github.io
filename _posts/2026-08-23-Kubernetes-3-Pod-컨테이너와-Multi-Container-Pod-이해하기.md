@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "kubectl", "pod", "container", "multi-container", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 Pod는 Kubernetes에서 컨테이너를 실행하는 가장 작은 배포 단위다. 간단한 웹 서버는 컨테이너 하나를 담은 Pod로 실행할 수 있고, 긴밀히 협력하는 컨테이너가 있다면 하나의 Pod에 함께 배치할 수도 있다.
 
 이번 글에서는 Nginx 단일 컨테이너 Pod를 명령어와 YAML로 생성하고, Nginx와 CentOS 컨테이너를 함께 실행하는 Multi-Container Pod를 살펴본다. 특히 같은 Pod의 컨테이너가 localhost를 통해 통신하는 흐름을 실습으로 확인한다.
@@ -68,7 +71,10 @@ describe 출력에서는 Pod IP, 컨테이너 이미지, 포트, 실행 상태�
 
 Pod는 YAML 매니페스트로 선언하면 설정을 검토하고 재현하기 쉽다. 다음은 Nginx 컨테이너 하나를 포함하는 Pod 예시다.
 
-~~~yaml
+다음 명령으로 `nginx-pod.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > nginx-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -80,10 +86,14 @@ spec:
       ports:
         - containerPort: 80
           protocol: TCP
-~~~
+EOF
+```
+
+```bash
+kubectl apply -f nginx-pod.yaml
+```
 
 ~~~bash
-kubectl create -f pod-nginx.yaml
 kubectl get pods -o wide
 ~~~
 
@@ -107,7 +117,8 @@ kubectl get pod web1 -o json | grep -i podip
 
 ~~~bash
 kubectl get pods -o wide
-curl <POD_IP>
+kubectl run curl --rm -i --restart=Never --image=curlimages/curl:8.10.1 -- \
+  "http://$(kubectl get pod web1 -o jsonpath='{.status.podIP}')"
 ~~~
 
 Pod IP로 Nginx에 요청하면 기본 페이지가 응답한다. 단, Pod IP는 Pod가 재생성되면 달라질 수 있으므로 서비스의 고정된 접속 주소로 사용해서는 안 된다.
@@ -125,7 +136,6 @@ kubectl run redis +  --image=redis123 +  --dry-run=client +  -o yaml > redis.yam
 생성한 YAML을 적용한 뒤 상태를 확인한다.
 
 ~~~bash
-kubectl create -f redis.yaml
 kubectl get pods
 ~~~
 
@@ -170,7 +180,10 @@ redis   1/1     Running   0          4m47s
 
 다음 매니페스트는 Nginx 웹 서버와 CentOS 컨테이너를 하나의 multipod에 넣는다. CentOS 컨테이너는 3초마다 localhost:80으로 요청을 보내도록 실행한다.
 
-~~~yaml
+다음 명령으로 `multipod.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > multipod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -187,10 +200,14 @@ spec:
         - /bin/sh
         - -c
         - while :; do curl http://localhost:80/; sleep 3; done
-~~~
+EOF
+```
+
+```bash
+kubectl apply -f multipod.yaml
+```
 
 ~~~bash
-kubectl create -f pod-multi.yaml
 kubectl get pods -o wide
 ~~~
 
