@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "container", "sidecar", "hostnetwork", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 Pod는 하나 이상의 컨테이너를 함께 실행하는 Kubernetes의 최소 배포 단위다. 하지만 컨테이너를 한 Pod에 넣는다고 모두 같은 방식으로 협력하는 것은 아니다. 애플리케이션의 생명주기, 네트워크, 데이터 공유가 밀접할 때만 Multi-Container Pod를 선택해야 한다.
 
 이번 글에서는 Pod와 컨테이너 런타임의 역할을 구분하고, Multi-Container Pod에서 자주 언급되는 Sidecar·Ambassador·Adapter 패턴과 컨테이너 실행 설정을 정리한다.
@@ -63,7 +66,10 @@ Sidecar는 애플리케이션의 본래 기능은 유지하면서 로그 수집,
 
 Docker 이미지의 `ENTRYPOINT`와 `CMD`는 Kubernetes Pod 명세에서 각각 `command`와 `args`로 바꿔 지정할 수 있다. 이를 이용하면 이미지를 다시 빌드하지 않고도 컨테이너의 시작 명령을 실습·검증 목적에 맞게 바꿀 수 있다.
 
-```yaml
+다음 명령으로 `sample-entrypoint.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > sample-entrypoint.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -75,10 +81,14 @@ spec:
       command: ["/bin/sleep"]
       args: ["3600"]
       workingDir: /tmp
+EOF
 ```
 
 ```bash
 kubectl apply -f sample-entrypoint.yaml
+```
+
+```bash
 kubectl exec -it sample-entrypoint -- /bin/sh
 ```
 
@@ -92,7 +102,10 @@ kubectl exec -it sample-entrypoint -- /bin/sh
 
 일반적으로 Pod는 노드 네트워크와 분리된 네트워크 공간에서 Pod IP를 받는다. `hostNetwork: true`를 설정하면 Pod가 노드의 네트워크 네임스페이스를 사용한다.
 
-```yaml
+다음 명령으로 `host-network-pod.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > host-network-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -104,6 +117,11 @@ spec:
       image: nginx
       ports:
         - containerPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f host-network-pod.yaml
 ```
 
 이 설정을 사용하면 컨테이너 포트가 노드의 포트와 직접 충돌할 수 있다. 따라서 일반적인 애플리케이션 Pod에는 기본 Pod 네트워크와 Service를 우선 사용하고, 노드 네트워크 접근이 꼭 필요한 시스템 수준 워크로드에서만 필요성과 보안 영향을 검토한 뒤 적용한다.
