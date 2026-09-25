@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "daemonset", "pod", "node", "logging", "monitoring", "rolling-update", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 
 ## 1. DaemonSet이 필요한 이유
 
@@ -46,8 +49,10 @@ DaemonSet
 
 다음 예제는 학습 목적으로 각 대상 노드에 NGINX Pod 하나를 실행한다. 실제 운영에서는 NGINX 대신 로그·모니터링 에이전트처럼 노드 단위 기능을 수행하는 컨테이너를 주로 사용한다.
 
-```yaml
-# daemonset-nginx.yaml
+다음 명령으로 `daemonset-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > daemonset-nginx.yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -66,6 +71,11 @@ spec:
           image: nginx:1.14
           ports:
             - containerPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f daemonset-nginx.yaml
 ```
 
 `spec.selector.matchLabels`와 `spec.template.metadata.labels`는 반드시 일치해야 한다. DaemonSet이 생성된 뒤 `spec.selector`는 변경할 수 없으므로, 다른 컨트롤러와 겹치지 않는 라벨을 처음부터 설계해야 한다.
@@ -79,7 +89,6 @@ ReplicaSet 매니페스트와 비슷하지만 `replicas`가 없다는 점이 핵
 매니페스트를 적용한 뒤 DaemonSet과 Pod 목록을 확인한다.
 
 ```bash
-kubectl apply -f daemonset-nginx.yaml
 kubectl get daemonset
 kubectl get ds
 kubectl get pods -o wide
@@ -134,8 +143,9 @@ spec:
 이 경우 노드에 라벨을 추가하면 DaemonSet이 Pod를 만들고, 라벨을 제거하면 해당 노드의 Pod를 삭제한다.
 
 ```bash
-kubectl label node <노드이름> logging=enabled
-kubectl label node <노드이름> logging-
+NODE_NAME=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+kubectl label node "$NODE_NAME" logging=enabled --overwrite
+kubectl label node "$NODE_NAME" logging-
 ```
 
 ---
@@ -146,7 +156,7 @@ DaemonSet이 관리하는 Pod 하나를 삭제해 본다.
 
 ```bash
 kubectl get pods -l app=webui -o wide
-kubectl delete pod <daemonset이-관리하는-pod-이름>
+kubectl delete pod "$(kubectl get pods -l app=webui -o jsonpath='{.items[0].metadata.name}')"
 kubectl get pods -l app=webui -o wide --watch
 ```
 
