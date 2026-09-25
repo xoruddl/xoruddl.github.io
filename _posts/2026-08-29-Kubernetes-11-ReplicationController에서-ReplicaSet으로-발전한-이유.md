@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "replicationcontroller", "replicas", "label", "selector", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 Pod를 직접 여러 개 만들면 Pod 하나가 삭제되거나 노드 장애로 사라졌을 때 원하는 개수를 직접 다시 맞춰야 한다. ReplicationController는 선언한 수만큼 같은 Pod가 실행되도록 감시하고, 부족하면 새 Pod를 만들어 원하는 상태를 유지한다.
 
 이번 글에서는 `rc-nginx` 예제로 초기 복제 컨트롤러의 동작을 확인하고, 선택자 표현력과 배포 관리 측면에서 ReplicaSet과 Deployment가 필요한 이유를 연결해서 살펴본다.
@@ -27,8 +30,10 @@ RC는 한 노드의 프로세스만 감시하는 프로세스 관리자가 아�
 
 다음 매니페스트는 `app: webui` 레이블을 가진 Nginx Pod 3개를 유지한다. `selector`는 RC가 관리할 Pod를 찾는 조건이고, `template.metadata.labels`는 RC가 새로 만드는 Pod에 붙일 레이블이다. 두 값은 반드시 일치해야 한다.
 
-```yaml
-# rc-nginx.yaml
+다음 명령으로 `rc-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > rc-nginx.yaml
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -50,6 +55,11 @@ spec:
       containers:
         - name: nginx-container
           image: nginx:1.14
+EOF
+```
+
+```bash
+kubectl apply -f rc-nginx.yaml
 ```
 
 RC가 직접 만든 Pod뿐 아니라 selector와 일치하는 다른 Pod도 관리 대상으로 볼 수 있다는 점에 주의해야 한다. 다른 컨트롤러나 독립 Pod에 `app: webui`를 무심코 붙이면 RC가 복제본 수를 맞추려고 예상하지 못한 Pod를 삭제하거나, 새 Pod 생성을 멈출 수 있다.
@@ -61,7 +71,6 @@ RC가 직접 만든 Pod뿐 아니라 selector와 일치하는 다른 Pod도 관�
 매니페스트를 적용하면 RC가 Pod 템플릿을 사용해 3개의 Pod를 만든다.
 
 ```bash
-kubectl apply -f rc-nginx.yaml
 
 # ReplicationController 목록 확인
 kubectl get replicationcontrollers
@@ -107,7 +116,7 @@ kubectl get pods -l app=webui
 Pod 하나를 삭제해도 RC는 다시 3개를 맞추기 위해 새 Pod를 만든다. 이 동작을 확인하려면 관리 대상 Pod 하나를 삭제한 뒤 Pod 목록을 관찰한다.
 
 ```bash
-kubectl delete pod <rc가-관리하는-pod-이름>
+kubectl delete pod "$(kubectl get pods -l app=webui -o jsonpath='{.items[0].metadata.name}')"
 watch -n 2 kubectl get pods -l app=webui
 ```
 

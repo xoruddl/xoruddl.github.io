@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "replicaset", "replicas", "label", "selector", "deployment", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 Pod는 노드 장애, 애플리케이션 오류, 실수로 인한 삭제처럼 여러 이유로 사라질 수 있다. ReplicaSet은 **지정한 수의 Pod가 계속 실행되도록 유지**하는 컨트롤러다. Pod 수가 부족하면 새 Pod를 만들고, 많으면 일부 Pod를 제거한다.
 
 이번 글에서는 NGINX Pod 세 개를 유지하는 ReplicaSet을 만들고, Pod 삭제·스케일 조정·컨트롤러만 삭제하는 동작을 확인한다.
@@ -29,7 +32,10 @@ ReplicaSet은 `selector`와 일치하는 Pod가 목표 수보다 적으면 `temp
 
 다음 매니페스트는 `app: webui` 라벨을 가진 NGINX Pod 세 개를 유지한다.
 
-```yaml
+다음 명령으로 `rs-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > rs-nginx.yaml
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -48,6 +54,11 @@ spec:
       containers:
         - name: nginx-container
           image: nginx:1.14
+EOF
+```
+
+```bash
+kubectl apply -f rs-nginx.yaml
 ```
 
 여기서 가장 중요한 부분은 `selector.matchLabels`와 `template.metadata.labels`다. 둘 모두 `app: webui`를 사용해야 ReplicaSet이 자신이 만든 Pod를 선택할 수 있다. `apps/v1` ReplicaSet에서는 이 둘이 일치하지 않으면 매니페스트가 거부된다.
@@ -106,7 +117,6 @@ template:
 매니페스트를 `rs-nginx.yaml`로 저장한 뒤 적용한다.
 
 ```bash
-kubectl apply -f rs-nginx.yaml
 kubectl get replicaset
 kubectl get rs
 kubectl get pod --show-labels
