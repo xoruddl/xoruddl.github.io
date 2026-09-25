@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "resources", "requests", "limits", "cpu", "memory", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 여러 Pod가 하나의 노드에서 함께 실행되면 CPU와 메모리를 무제한으로 사용하려는 컨테이너가 다른 애플리케이션의 실행을 방해할 수 있다. Kubernetes는 컨테이너의 `resources.requests`와 `resources.limits`로 필요한 자원과 사용할 수 있는 상한을 선언하게 한다.
 
 이번 글에서는 `nginx-pod-resource` 예제를 바탕으로 requests와 limits의 역할, CPU·메모리 단위, `kubectl describe pod` 출력 확인 방법, 제한을 넘었을 때의 동작을 정리한다.
@@ -47,8 +50,10 @@ CPU는 코어 수를 기준으로 표현한다. `1`은 CPU 1개를 뜻하고, `m
 
 다음 예제의 Nginx 컨테이너는 CPU 200m·메모리 250Mi를 request로 선언하고, CPU 1개·메모리 500Mi를 limit로 선언한다. request보다 limit가 크므로, 노드에 여유가 있을 때는 일시적으로 request보다 더 많은 자원을 사용할 수 있지만 정한 상한을 넘을 수는 없다.
 
-```yaml
-# pod-nginx-resources.yaml
+다음 명령으로 `pod-nginx-resources.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > pod-nginx-resources.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -69,10 +74,14 @@ spec:
           # 컨테이너가 사용할 수 있는 상한
           cpu: 1
           memory: 500Mi
+EOF
 ```
 
 ```bash
 kubectl apply -f pod-nginx-resources.yaml
+```
+
+```bash
 kubectl get pods
 kubectl describe pod nginx-pod-resource
 ```

@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "environment-variable", "kubectl-exec", "configuration", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 컨테이너 이미지는 여러 환경에서 같은 방식으로 재사용하고, 실행 환경마다 달라지는 값은 Pod 설정으로 분리하는 편이 좋다. Kubernetes의 환경 변수는 애플리케이션의 주소, 실행 모드, 기능 플래그처럼 컨테이너 시작 시 전달할 값을 선언하는 기본적인 방법이다.
 
 이번 글에서는 `MYVAR=testvalue` 환경 변수를 Pod에 설정하고 `kubectl exec`로 컨테이너 안의 값을 확인하는 방법을 정리한다. 여러 값을 ConfigMap과 Secret으로 분리하는 방법은 기본 Pod와 Service를 익힌 뒤 별도 글에서 다룬다.
@@ -25,8 +28,10 @@ Pod의 `env`는 컨테이너에 전달할 환경 변수를 지정한다. 같은 
 
 다음 매니페스트는 Nginx 컨테이너에 `MYVAR` 환경 변수를 전달한다. 환경 변수 값은 문자열로 작성하는 습관이 안전하며, 특히 숫자·불리언처럼 YAML이 다른 타입으로 해석할 수 있는 값은 따옴표로 감싼다.
 
-```yaml
-# pod-nginx-env.yaml
+다음 명령으로 `pod-nginx-env.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > pod-nginx-env.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -41,10 +46,14 @@ spec:
       env:
         - name: MYVAR
           value: "testvalue"
+EOF
 ```
 
 ```bash
 kubectl apply -f pod-nginx-env.yaml
+```
+
+```bash
 kubectl get pod nginx-pod-env
 
 # 컨테이너 환경 변수 전체 출력

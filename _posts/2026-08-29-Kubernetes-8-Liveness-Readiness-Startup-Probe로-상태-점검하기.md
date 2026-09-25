@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "health-check", "probe", "liveness", "readiness", "startup", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 컨테이너 프로세스가 실행 중이라는 사실만으로 애플리케이션이 요청을 정상 처리한다는 보장은 없다. 교착 상태에 빠졌거나, 데이터베이스 연결을 기다리고 있거나, 초기 캐시를 아직 불러오는 중일 수 있다.
 
 Kubernetes Probe는 kubelet이 컨테이너 상태를 주기적으로 확인하도록 하는 설정이다. 결과에 따라 컨테이너를 재시작하거나 Service 트래픽 대상에서 제외할 수 있으므로, 장애 복구와 안전한 배포 모두에 중요한 역할을 한다.
@@ -83,8 +86,10 @@ startupProbe:
 
 다음 Pod는 `/index.html`을 Liveness Probe로, 별도의 정적 파일을 Readiness Probe로 확인한다. 실서비스에서는 정적 파일 대신 애플리케이션이 의존성 연결과 초기화를 확인하는 `/health`·`/ready` 같은 엔드포인트를 사용하는 편이 일반적이다.
 
-```yaml
-# sample-healthcheck.yaml
+다음 명령으로 `sample-healthcheck.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > sample-healthcheck.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -111,10 +116,14 @@ spec:
         timeoutSeconds: 1
         successThreshold: 2
         failureThreshold: 1
+EOF
 ```
 
 ```bash
 kubectl apply -f sample-healthcheck.yaml
+```
+
+```bash
 kubectl get pod sample-healthcheck --watch
 kubectl describe pod sample-healthcheck
 ```

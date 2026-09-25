@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "pod", "init-container", "infra-container", "pause-container", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 Pod가 시작될 때 애플리케이션 컨테이너만 바로 실행되는 것은 아니다. 필요한 네트워크와 볼륨을 준비한 뒤, 애플리케이션 실행 전의 작업이 있다면 Init Container가 이를 먼저 처리한다.
 
 이번 글에서는 Pod 명세에 직접 작성하는 Init Container와 컨테이너 런타임이 Pod 실행 환경을 만들 때 사용하는 Infra Container를 구분하고, Init Container를 실제로 구성하고 확인하는 방법을 정리한다.
@@ -60,8 +63,10 @@ Init Container는 앱 컨테이너가 시작되기 전에 실행되는 특수한
 
 Service의 타입과 트래픽 전달 과정은 17편에서 자세히 다룬다. 여기서는 Service가 클러스터 안에서 일정한 DNS 이름을 제공한다는 점만 사용한다.
 
-```yaml
-# service.yaml
+다음 명령으로 `service.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > service.yaml
 ---
 apiVersion: v1
 kind: Service
@@ -82,12 +87,19 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 9377
+EOF
+```
+
+```bash
+kubectl apply -f service.yaml
 ```
 
 다음 Pod의 Init Container는 현재 네임스페이스를 서비스 어카운트 토큰이 마운트된 경로에서 읽고, FQDN 형식으로 두 Service를 차례로 조회한다. `myservice`가 해석될 때까지 첫 번째 Init Container가 반복되고, 성공한 뒤에만 `mydb`를 확인하는 두 번째 Init Container가 실행된다. 두 단계가 모두 끝나야 `myapp-container`가 시작된다.
 
-```yaml
-# myapp-pod.yaml
+다음 명령으로 `myapp-pod.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > myapp-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -106,11 +118,15 @@ spec:
     - name: init-mydb
       image: busybox:1.28
       command: ['sh', '-c', "until nslookup mydb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done"]
+EOF
 ```
 
 ```bash
-kubectl apply -f service.yaml
 kubectl apply -f myapp-pod.yaml
+```
+
+```bash
+
 
 # Init Container와 앱 컨테이너의 상태를 함께 확인
 kubectl get pod myapp-pod
