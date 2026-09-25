@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "deployment", "replicaset", "pod", "rolling-update", "rollback", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 
 ## 1. Deployment란?
 
@@ -56,8 +59,10 @@ Deployment가 소유한 ReplicaSet은 직접 수정하거나 삭제하지 않는
 
 다음 매니페스트는 NGINX 1.15를 실행하는 Pod 세 개를 배포한다.
 
-```yaml
-# deploy-nginx.yaml
+다음 명령으로 `deploy-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > deploy-nginx.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -86,6 +91,11 @@ spec:
           image: nginx:1.15
           ports:
             - containerPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f deploy-nginx.yaml
 ```
 
 `spec.selector.matchLabels`와 `spec.template.metadata.labels`는 반드시 일치해야 한다. `apps/v1` Deployment에서 selector는 생성 후 변경할 수 없으므로, 처음부터 다른 컨트롤러와 겹치지 않는 라벨을 설계하는 것이 중요하다.
@@ -110,7 +120,6 @@ spec:
 매니페스트를 적용하고 Deployment, ReplicaSet, Pod를 함께 확인한다.
 
 ```bash
-kubectl apply -f deploy-nginx.yaml
 kubectl get deploy,rs,pod
 ```
 
@@ -160,6 +169,7 @@ spec:
 ```
 
 ```bash
+# deploy-nginx.yaml에서 이미지와 change-cause를 수정한 뒤 다시 적용
 kubectl apply -f deploy-nginx.yaml
 ```
 
