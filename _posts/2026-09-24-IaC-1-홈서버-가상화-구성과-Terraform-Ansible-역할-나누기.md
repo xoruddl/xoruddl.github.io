@@ -150,21 +150,51 @@ ssh-keygen -t ed25519 -N "" -f ~/.ssh/id_ed25519
 ```text
 k8s-lab/
 ├── terraform/
-│   ├── versions.tf        provider 버전 고정
-│   ├── variables.tf       worker 수·사양·네트워크 변수
-│   ├── main.tf            네트워크, 디스크, VM, inventory 생성
+│   ├── versions.tf
+│   ├── variables.tf
+│   ├── main.tf
 │   ├── outputs.tf
-│   ├── terraform.tfvars   worker 번호 목록, SSH 공개키
-│   └── templates/         cloud-init, inventory 템플릿
+│   ├── terraform.tfvars
+│   └── templates/
+│       ├── user-data.yaml.tftpl
+│       ├── network-config.yaml.tftpl
+│       └── inventory.ini.tftpl
 └── ansible/
     ├── ansible.cfg
+    ├── inventory.ini                  ← terraform apply가 자동 생성
     ├── group_vars/all.yml
-    ├── site.yml           클러스터 구축 (worker 추가에도 사용)
-    ├── remove-worker.yml  worker 제거
-    └── tasks/common.yml   모든 노드 공통 준비
+    ├── site.yml
+    ├── remove-worker.yml
+    ├── handlers/main.yml
+    ├── tasks/
+    │   ├── common.yml
+    │   └── nfs-server.yml
+    └── templates/
+        ├── calico-installation.yaml.j2
+        └── nfs-storageclass.yaml.j2
 ```
 
-`terraform/`은 2편, `ansible/`은 3편에서 채운다.
+각 파일이 하는 일과, 전체 코드를 볼 수 있는 글은 다음과 같다.
+
+| 파일 | 하는 일 | 전체 코드 |
+| --- | --- | --- |
+| `terraform/versions.tf` | Terraform과 provider 버전 고정, libvirt 접속 주소 지정 | 2편 |
+| `terraform/variables.tf` | worker 번호 목록, 노드 사양, 네트워크 대역 같은 입력값 정의 | 2편 (5편에서 NFS 추가) |
+| `terraform/main.tf` | 네트워크, 디스크, cloud-init, VM, inventory 파일 생성 | 2편 (5편에서 NFS 추가) |
+| `terraform/outputs.tf` | apply 후 노드 이름과 IP 출력 | 2편 |
+| `terraform/terraform.tfvars` | 실제로 쓸 값(worker 번호, SSH 공개키) 지정 | 2편 |
+| `terraform/templates/user-data.yaml.tftpl` | VM 첫 부팅 때 계정·SSH 키 설정 | 2편 |
+| `terraform/templates/network-config.yaml.tftpl` | VM 고정 IP 설정 | 2편 |
+| `terraform/templates/inventory.ini.tftpl` | Ansible inventory 파일의 형식 | 2편 (5편에서 NFS 추가) |
+| `ansible/ansible.cfg` | inventory 위치, 접속 계정, SSH 옵션 | 3편 |
+| `ansible/group_vars/all.yml` | 버전, 네트워크 대역 같은 공통 변수 | 3편 (5편에서 NFS 추가) |
+| `ansible/site.yml` | 클러스터 구축 전체 흐름 (worker 추가에도 사용) | 3편 (5편에서 NFS 추가) |
+| `ansible/tasks/common.yml` | 모든 노드 공통 준비 (swap, 커널, containerd, kubeadm) | 3편 (5편에서 수정) |
+| `ansible/handlers/main.yml` | 설정이 바뀌었을 때만 서비스 재시작 | 3편 |
+| `ansible/templates/calico-installation.yaml.j2` | Calico Pod 네트워크 설정 | 3편 |
+| `ansible/remove-worker.yml` | worker를 클러스터에서 안전하게 빼기 | 4편 |
+| `ansible/tasks/nfs-server.yml` | NFS 서버 구성 | 5편 |
+| `ansible/templates/nfs-storageclass.yaml.j2` | NFS 기본 StorageClass | 5편 |
 
 ---
 
