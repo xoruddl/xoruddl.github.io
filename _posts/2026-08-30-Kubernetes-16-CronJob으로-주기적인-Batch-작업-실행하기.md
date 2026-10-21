@@ -6,7 +6,6 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "cronjob", "job", "batch", "schedule", "concurrencypolicy", "쿠버네티스"]
 ---
 
-
 ## 1. CronJob이 필요한 이유
 
 Job은 한 번 실행해 완료하는 Batch **작업을** 관리한다. 백업, 정기 보고서 생성, 이메일 발송, 오래된 데이터 정리처럼 같은 Job을 일정한 주기로 반복해야 한다면 매번 직접 Job을 만들기보다 CronJob을 사용한다.
@@ -31,8 +30,10 @@ CronJob은 정확히 한 번 실행되는 것을 보장하는 도구가 아니�
 
 다음 예제는 매분 BusyBox 컨테이너를 실행해 `Hello`를 출력하고 10초 대기한 뒤 `Bye`를 출력한다. 실행 중인 이전 Job과 겹치지 않도록 `concurrencyPolicy: Forbid`를 설정했다.
 
-```yaml
-# cronjob-exam.yaml
+다음 명령으로 `cronjob-exam.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > cronjob-exam.yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -55,6 +56,11 @@ spec:
                 - -c
                 - echo Hello; sleep 10; echo Bye
           restartPolicy: Never
+EOF
+```
+
+```bash
+kubectl apply -f cronjob-exam.yaml
 ```
 
 `schedule`은 YAML 문자열로 작성해야 한다. 따옴표 없이 `*`를 쓰면 YAML에서 별칭 문법으로 해석될 수 있으므로, 항상 `"* * * * *"`처럼 감싸는 편이 안전하다.
@@ -153,7 +159,6 @@ spec:
 현재 Kubernetes에서는 CronJob에 `batch/v1` API를 사용한다. 실습에서 `batch/v1beta1`으로 적용했을 때 `no matches for kind "CronJob" in version "batch/v1beta1"` 오류가 난 것은 클러스터가 이전 베타 API를 제공하지 않기 때문이다. 매니페스트를 `batch/v1`으로 바꾼 뒤 정상 생성됐다.
 
 ```bash
-kubectl apply -f cronjob-exam.yaml
 kubectl get cronjob
 kubectl get jobs
 kubectl get pods
@@ -181,7 +186,8 @@ kubectl get cronjob cronjob-exam -o yaml
 
 ```bash
 kubectl get jobs
-kubectl logs job/<cronjob이-만든-job-이름>
+JOB_NAME=$(kubectl get jobs -l batch.kubernetes.io/cronjob-name=cronjob-exam -o jsonpath='{.items[-1:].metadata.name}')
+kubectl logs job/"$JOB_NAME"
 ```
 
 ---
