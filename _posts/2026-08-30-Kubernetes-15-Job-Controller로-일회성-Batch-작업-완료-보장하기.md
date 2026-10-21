@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "job", "job-controller", "batch", "pod", "backofflimit", "activedeadlineseconds", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 
 ## 1. Job이 필요한 이유
 
@@ -45,8 +48,10 @@ Job Controller
 
 다음 예제는 CentOS 컨테이너에서 `Hello World`를 출력하고 25초 대기한 다음 `Bye`를 출력하는 Job이다. 다만 Job 전체 실행 시간을 5초로 제한했으므로 실제로는 `Bye`를 출력하기 전에 시간 제한에 걸려 실패한다.
 
-```yaml
-# job-exam.yaml
+다음 명령으로 `job-exam.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > job-exam.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -67,6 +72,11 @@ spec:
       # restartPolicy: Never
       restartPolicy: OnFailure
   # backoffLimit: 3
+EOF
+```
+
+```bash
+kubectl apply -f job-exam.yaml
 ```
 
 Job의 `spec.template`은 Pod 설계도다. Job Pod의 `restartPolicy`에는 `Always`를 사용할 수 없으며, `Never` 또는 `OnFailure` 중 하나를 지정해야 한다.
@@ -131,7 +141,6 @@ kubectl get job centos-job -o wide
 매니페스트를 적용하고 Job과 Pod 상태를 함께 확인한다.
 
 ```bash
-kubectl apply -f job-exam.yaml
 kubectl get jobs
 kubectl get pods
 ```
@@ -143,13 +152,12 @@ kubectl logs job/centos-job
 
 # 또는 Job이 만든 Pod를 선택해 로그 조회
 kubectl get pods -l batch.kubernetes.io/job-name=centos-job
-kubectl logs <pod-name>
+kubectl logs "$(kubectl get pods -l batch.kubernetes.io/job-name=centos-job -o jsonpath='{.items[0].metadata.name}')"
 ```
 
 작업을 마친 뒤에는 Job 리소스를 삭제한다.
 
 ```bash
-kubectl delete -f job-exam.yaml
 # 또는
 kubectl delete job centos-job
 ```
@@ -172,7 +180,7 @@ Job은 생성된 Pod가 어떤 명령·이미지·재시작 정책으로 실행�
 
 ```bash
 kubectl delete job centos-job
-kubectl apply -f job-exam.yaml
+
 ```
 
 반복 실행이 필요하면 같은 이름의 완료된 Job을 재사용하지 말고 삭제 후 생성하거나, 매번 다른 이름을 사용한다. 정기 실행이 목적이라면 Job을 직접 반복 생성하는 대신 CronJob을 사용한다.
