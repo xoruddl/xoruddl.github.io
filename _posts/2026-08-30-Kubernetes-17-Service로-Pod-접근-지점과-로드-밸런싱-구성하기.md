@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "clusterip", "nodeport", "loadbalancer", "externalname", "networking", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 
 ## 1. Service가 필요한 이유
 
@@ -120,7 +123,10 @@ curl http://command.test.com/
 
 Service는 주로 `selector`와 `ports`로 어떤 Pod의 어느 포트로 보낼지 정한다.
 
-```yaml
+다음 명령으로 `clusterip-service.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > clusterip-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -133,6 +139,11 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f clusterip-service.yaml
 ```
 
 `selector`의 `app: webui`는 Pod의 레이블과 정확히 일치해야 한다. 이 예제에서는 Deployment가 만든 `app=webui` Pod들이 Service의 백엔드가 된다. selector가 일치하지 않으면 Service는 만들 수 있어도 연결할 엔드포인트가 없어 요청을 전달하지 못한다.
@@ -182,8 +193,10 @@ kubectl describe svc clusterip-service
 
 `ClusterIP`는 Service 타입을 생략했을 때 적용되는 기본값이다. Service 전용 CIDR에서 가상 IP를 할당하며, 일반적으로 클러스터 내부에서만 이 IP와 DNS 이름으로 접근한다.
 
-```yaml
-# clusterip-nginx.yaml
+다음 명령으로 `clusterip-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > clusterip-nginx.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -197,15 +210,20 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f clusterip-nginx.yaml
 ```
 
 `clusterIP`를 생략하면 Kubernetes가 Service CIDR에서 사용 가능한 IP를 자동 할당한다. 실습에서는 `10.96.213.208`이 할당됐고, 이 주소로 `curl`해 NGINX 응답을 확인했다.
 
 ```bash
-kubectl apply -f clusterip-nginx.yaml
 kubectl get svc clusterip-service
 kubectl describe svc clusterip-service
-curl <cluster-ip>
+kubectl run curl --rm -i --restart=Never --image=curlimages/curl:8.10.1 -- \
+  http://clusterip-service
 ```
 
 특정 `clusterIP`를 직접 지정할 수도 있지만, 반드시 API 서버에 설정된 Service CIDR 범위 안의 미사용 주소여야 한다. 실습에서 `10.100.100.100`을 지정했을 때 현재 클러스터의 범위와 맞지 않아 다음 오류가 발생했다.
@@ -224,8 +242,10 @@ failed to allocate IP 10.100.100.100: the provided network does not match the cu
 
 `NodePort`는 ClusterIP를 만들고, 모든 노드의 IP에 같은 포트를 열어 외부에서 접근할 수 있게 한다. 기본 포트 범위는 `30000-32767`이며, 실습의 `30200`은 그 범위에 포함된다.
 
-```yaml
-# nodeport-nginx.yaml
+다음 명령으로 `nodeport-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > nodeport-nginx.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -240,6 +260,11 @@ spec:
       port: 80
       targetPort: 80
       nodePort: 30200
+EOF
+```
+
+```bash
+kubectl apply -f nodeport-nginx.yaml
 ```
 
 접속 주소는 **Pod IP가 아니라 노드 IP**다.
@@ -251,11 +276,12 @@ http://<node-ip>:30200
 실습에서 `curl 10.244.3.48:30200`이 실패한 것은 `10.244.3.48`이 Pod IP이기 때문이다. Pod의 NGINX 포트에는 `curl 10.244.3.48:80`으로 직접 연결할 수 있지만, `30200`은 Pod에 열린 포트가 아니라 NodePort를 위해 노드에 예약된 포트다.
 
 ```bash
-kubectl apply -f nodeport-nginx.yaml
 kubectl get svc nodeport-service
 
 # 노드 IP로 접속
-curl http://<node-ip>:30200
+NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+kubectl run curl --rm -i --restart=Never --image=curlimages/curl:8.10.1 -- \
+  "http://${NODE_IP}:30200"
 ```
 
 `<node-ip>:30200`으로 들어온 요청도 selector에 연결된 여러 Pod 엔드포인트 중 하나로 전달되므로, 결과적으로 **Service 수준의 L4 트래픽 분산**이 동작한다. 다만 `LoadBalancer` 타입처럼 클라우드나 별도 장비의 외부 로드 밸런서가 처리하는 것은 아니다. NodePort에서는 각 노드의 kube-proxy 또는 CNI가 노드 포트로 들어온 트래픽을 Service의 백엔드 Pod로 전달한다.
@@ -268,8 +294,10 @@ curl http://<node-ip>:30200
 
 `LoadBalancer`는 클라우드 제공자 또는 로드 밸런서 구현체에 외부 로드 밸런서 생성을 요청하는 Service 타입이다. 일반적으로 LoadBalancer Service는 NodePort를 바탕으로 외부 로드 밸런서의 트래픽을 백엔드 Pod로 전달한다.
 
-```yaml
-# loadbalancer-nginx.yaml
+다음 명령으로 `loadbalancer-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > loadbalancer-nginx.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -282,10 +310,14 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+EOF
 ```
 
 ```bash
 kubectl apply -f loadbalancer-nginx.yaml
+```
+
+```bash
 kubectl get svc loadbalancer-service
 ```
 
@@ -340,8 +372,10 @@ EXTERNAL-IP: 203.0.113.10      # 외부 Load Balancer의 공인 IP 예시
 
 `ExternalName`은 Pod를 선택하거나 프록시를 구성하지 않는다. 대신 클러스터 내부의 Service DNS 이름을 외부 도메인의 CNAME 별칭으로 응답하게 한다.
 
-```yaml
-# external-name.yaml
+다음 명령으로 `external-name.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > external-name.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -349,12 +383,16 @@ metadata:
 spec:
   type: ExternalName
   externalName: google.com
+EOF
+```
+
+```bash
+kubectl apply -f external-name.yaml
 ```
 
 이 Service를 만들면 내부 클라이언트는 `externalname-svc.default.svc.cluster.local`로 요청할 수 있고, 클러스터 DNS가 이를 `google.com`으로 해석한다.
 
 ```bash
-kubectl apply -f external-name.yaml
 kubectl get svc externalname-svc
 
 # 클러스터 내부에서 확인
@@ -381,8 +419,8 @@ Service 상태와 엔드포인트는 다음 명령으로 확인한다.
 
 ```bash
 kubectl get svc
-kubectl describe svc <service-name>
-kubectl get endpointslice -l kubernetes.io/service-name=<service-name>
+kubectl describe svc clusterip-service
+kubectl get endpointslice -l kubernetes.io/service-name=clusterip-service
 ```
 
 마지막으로 `kubectl delete svc --all`은 현재 네임스페이스의 Service를 전부 삭제한다. 실습 로그처럼 기본 `kubernetes` Service까지 대상이 될 수 있으므로, 운영 환경에서는 `kubectl delete svc <service-name>`처럼 삭제 대상을 명확히 지정해야 한다.
