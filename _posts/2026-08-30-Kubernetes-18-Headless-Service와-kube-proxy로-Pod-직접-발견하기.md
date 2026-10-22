@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "service", "headless-service", "kube-proxy", "dns", "endpointslice", "iptables", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 
 ## 1. Headless Service가 필요한 이유
 
@@ -27,8 +30,10 @@ Headless Service
 
 다음은 `app: webui` 레이블을 가진 Pod를 대상으로 하는 Headless Service다. YAML에서는 `metadata.name`과 각 계층의 들여쓰기가 정확해야 한다.
 
-```yaml
-# headless-nginx.yaml
+다음 명령으로 `headless-nginx.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > headless-nginx.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -42,6 +47,11 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+EOF
+```
+
+```bash
+kubectl apply -f headless-nginx.yaml
 ```
 
 `type: ClusterIP`는 생략해도 기본값으로 적용된다. 핵심은 `clusterIP: None`이다. 이 문자열은 IP 할당을 생략하라는 특별한 설정이며, `clusterIP` 필드를 단순히 비워 두는 것과는 다르다.
@@ -226,7 +236,6 @@ kubectl -n kube-system get daemonset kube-proxy -o yaml
 Headless Service를 적용하고 Service·엔드포인트·DNS를 차례로 확인한다.
 
 ```bash
-kubectl apply -f headless-nginx.yaml
 kubectl get svc headless-service
 kubectl describe svc headless-service
 kubectl get endpointslice -l kubernetes.io/service-name=headless-service
