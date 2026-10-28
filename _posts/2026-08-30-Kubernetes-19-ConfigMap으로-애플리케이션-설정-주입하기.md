@@ -6,6 +6,9 @@ categories: ["Kubernetes"]
 tags: ["kubernetes", "configmap", "configuration", "environment-variable", "volume", "nginx", "쿠버네티스"]
 ---
 
+<!-- runnable-kubernetes-manifests -->
+> **실습 전 확인하기**: `kubectl`이 실습용 클러스터를 가리키는지 먼저 확인한다. `cat <<'EOF' > 파일명`으로 시작하는 블록은 터미널에 그대로 붙여넣으면 현재 디렉터리에 YAML 파일이 만들어지고, 이어지는 `kubectl apply -f` 명령으로 적용한다. 필드 일부만 보여 주는 YAML 조각은 설명용이다.
+
 애플리케이션은 개발·테스트·운영 환경마다 서로 다른 설정값을 사용한다. 예를 들어 실행 모드, 서버 주소, 로그 수준, 기능을 켜고 끄는 값이 여기에 해당한다. 이런 일반 설정값은 컨테이너 이미지와 분리해 관리하는 편이 좋다.
 
 Kubernetes의 ConfigMap은 일반 설정 데이터를 저장해 Pod에 전달하는 리소스다. `APP_MODE=production`처럼 설정 항목 하나를 저장할 수도 있고, Nginx 설정 파일처럼 파일 전체를 저장할 수도 있다. 다만 ConfigMap은 기밀 정보를 위한 저장소가 아니므로 비밀번호·토큰·인증서 개인 키는 Secret으로 관리해야 한다.
@@ -137,8 +140,10 @@ sample-app-config
                                       └─ sample-config-env 컨테이너
 ```
 
-```yaml
-# sample-config-env.yaml
+다음 명령으로 `sample-config-env.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > sample-config-env.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -165,10 +170,14 @@ spec:
             configMapKeyRef:
               name: sample-app-config
               key: LOG_LEVEL
+EOF
 ```
 
 ```bash
 kubectl apply -f sample-config-env.yaml
+```
+
+```bash
 kubectl logs sample-config-env
 ```
 
@@ -199,8 +208,10 @@ envFrom:
 
 아래 예제는 `sample-configmap`의 `nginx.conf` 키를 `/etc/nginx-config/nginx.conf` 파일로 제공한다. 예제 컨테이너는 파일 내용을 출력해 정상적으로 전달됐는지 확인한다.
 
-```yaml
-# sample-config-volume.yaml
+다음 명령으로 `sample-config-volume.yaml` 파일을 만든다.
+
+```bash
+cat <<'EOF' > sample-config-volume.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -228,10 +239,14 @@ spec:
       configMap:
         # 같은 Namespace에 있는 ConfigMap을 이 볼륨의 내용으로 사용한다.
         name: sample-configmap
+EOF
 ```
 
 ```bash
 kubectl apply -f sample-config-volume.yaml
+```
+
+```bash
 kubectl logs sample-config-volume
 kubectl exec sample-config-volume -- ls /etc/nginx-config
 ```
